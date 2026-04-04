@@ -1,0 +1,15 @@
+[project]
+name = "will-it-python"
+version = "0.1.0"
+description = "An assortment of scripts written to see if the idea can be accomplished in Python"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+police_lights = "will_it_python.police_lights:main"
+emgy = "will_it_python.police_lights:emgy"
+code3 = "will_it_python.police_lights:code3"
+pursuit = "will_it_python.police_lights:pursuit"
+traffic = "will_it_python.police_lights:traffic_stop"
+cruise = "will_it_python.police_lights:cruise"
