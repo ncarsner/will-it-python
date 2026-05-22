@@ -209,3 +209,8 @@ __marimo__/
 .claude/
 AGENTS/
 RULES.md
+*-session.md
+ralph.sh
+
+# Session summaries and other dated markdown files
+[0-9][0-9][0-9][0-9]*.md

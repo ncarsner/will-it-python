@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — feat-personalities-v2 (planned)
+
+### Added
+
+- `PRD-personalities-v2.md` — visual/UX improvement spec: drop backdrop,
+  bolder borders, remove grid, floating tick labels, axis normalization,
+  randomized sample persons, sphere/cube toggle
+- GitHub issues #2–#6 tracking all v2 work items
+
+---
+
 ## [Unreleased] — feat-personalities (PR #1)
 
 ### Added
