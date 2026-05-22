@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "An assortment of scripts written to see if the idea can be accomplished in Python"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "dash>=4.1.0",
+    "plotly>=6.7.0",
+]
 
 [project.scripts]
 police_lights = "will_it_python.police_lights:main"
@@ -13,3 +16,74 @@ code3 = "will_it_python.police_lights:code3"
 pursuit = "will_it_python.police_lights:pursuit"
 traffic = "will_it_python.police_lights:traffic_stop"
 cruise = "will_it_python.police_lights:cruise"
+personalities = "will_it_python.personalities:main"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "C4", "UP", "N", "RUF", "PT", "SIM", "BLE", "PL", "ANN"]
+ignore = ["D100", "D104", "D203", "D213", "PLR0913"]
+fixable = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "ANN", "D", "PLR2004", "PLC0415"]
+"src/**/__init__.py" = ["F401"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+check_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_reexport = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["dash.*", "plotly.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["will_it_python.police_lights"]
+ignore_errors = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-v", "--strict-markers", "--tb=short"]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+omit = ["src/will_it_python/police_lights.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.1.0",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "pytest-mock>=3.15.1",
+]
