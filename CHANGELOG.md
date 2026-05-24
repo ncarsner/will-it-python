@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — naval-flags (PR #8)
+
+### Added
+
+- `naval_flags` CLI: converts text (A-Z, 0-9) to ICS signal flag
+  representations rendered in the terminal as ANSI color blocks
+- `--ascii` flag for monochrome NO_COLOR-compatible output
+- 36 ICS reference SVGs sourced from Wikimedia Commons stored in
+  `assets/naval_flags/`
+- 103 tests with 100% branch coverage
+
+---
+
 ## [Unreleased] — feat-personalities-v2 (planned)
 
 ### Added
