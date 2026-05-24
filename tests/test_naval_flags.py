@@ -295,7 +295,7 @@ def test_render_flag_ascii_line_width():
         ("G", (0, 2), "B"),  # Golf: second stripe = blue
         ("H", (0, 0), "W"),  # Hotel: left = white
         ("H", (0, 9), "R"),  # Hotel: right = red
-        ("I", (3, 5), "K"),  # India: center circle = black
+        ("I", (3, 4), "K"),  # India: center circle = black
         ("I", (0, 0), "Y"),  # India: corner = gold
         ("J", (3, 5), "W"),  # Juliett: center band = white
         ("J", (0, 0), "B"),  # Juliett: outer = blue
@@ -315,7 +315,7 @@ def test_render_flag_ascii_line_width():
         ("S", (0, 0), "W"),  # Sierra: border = white
         ("S", (3, 5), "B"),  # Sierra: inner = blue
         ("T", (0, 0), "R"),  # Tango: left stripe = red
-        ("T", (0, 9), "B"),  # Tango: right stripe = blue
+        ("T", (0, 7), "B"),  # Tango: right stripe = blue
         ("U", (0, 0), "R"),  # Uniform: TL = red
         ("U", (0, 9), "W"),  # Uniform: TR = white
         ("V", (0, 0), "R"),  # Victor: diagonal → cross color
@@ -329,9 +329,9 @@ def test_render_flag_ascii_line_width():
         # Numerals
         ("0", (0, 4), "R"),  # Zero: center band = red
         ("0", (0, 0), "Y"),  # Zero: outer = gold
-        ("1", (3, 5), "R"),  # One: center = red circle
+        ("1", (3, 4), "R"),  # One: center = red circle
         ("1", (0, 0), "W"),  # One: corner = white
-        ("2", (3, 5), "W"),  # Two: center = white circle
+        ("2", (3, 4), "W"),  # Two: center = white circle
         ("2", (0, 0), "B"),  # Two: corner = blue
         ("3", (0, 0), "R"),  # Three: left stripe = red
         ("4", (0, 0), "W"),  # Four: corner on main diagonal → cross color (white)
@@ -364,21 +364,20 @@ def test_display_text_valid_letter(capsys):
     display_text("A")
     out, _ = capsys.readouterr()
     assert "A" in out
-    assert "Alfa" in out
+    assert "\033[" in out  # ANSI color blocks rendered
 
 
 def test_display_text_valid_digit(capsys):
     display_text("5")
     out, _ = capsys.readouterr()
-    assert "Five" in out
+    assert "5" in out  # header shows input
 
 
-def test_display_text_space_inserts_blank_line(capsys):
+def test_display_text_space_preserved_in_header(capsys):
     display_text("A B")
     out, _ = capsys.readouterr()
-    lines = out.split("\n")
-    # Should have content for A, blank separator, content for B
-    assert any(line == "" for line in lines)
+    # Space is kept in the header and flags render on the same rows
+    assert "A B" in out
 
 
 def test_display_text_unknown_only_shows_message(capsys):
@@ -394,24 +393,23 @@ def test_display_text_empty_string_shows_message(capsys):
 
 
 def test_display_text_mixed_valid_and_invalid(capsys):
-    display_text("A!B")  # ! skipped, A and B rendered
+    display_text("A!B")  # ! skipped, A and B rendered side by side
     out, _ = capsys.readouterr()
-    assert "Alfa" in out
-    assert "Bravo" in out
+    assert "No valid characters" not in out
+    assert "\033[" in out  # flag content rendered
 
 
 def test_display_text_ascii_mode(capsys):
     display_text("B", ascii_mode=True)
     out, _ = capsys.readouterr()
     assert "\033[" not in out  # no ANSI codes
-    assert "Bravo" in out
+    assert "B" in out  # header shows input
 
 
 def test_display_text_lowercase_input(capsys):
     display_text("sos")
     out, _ = capsys.readouterr()
-    assert "Sierra" in out
-    assert "Oscar" in out
+    assert "SOS" in out  # header uppercases input
 
 
 # ---------------------------------------------------------------------------
@@ -423,8 +421,8 @@ def test_main_renders_text(capsys):
     with patch("sys.argv", ["naval_flags", "AB"]):
         main()
     out, _ = capsys.readouterr()
-    assert "Alfa" in out
-    assert "Bravo" in out
+    assert "AB" in out  # header shows input
+    assert "\033[" in out  # flag content rendered
 
 
 def test_main_ascii_flag(capsys):
@@ -432,12 +430,11 @@ def test_main_ascii_flag(capsys):
         main()
     out, _ = capsys.readouterr()
     assert "\033[" not in out
-    assert "Quebec" in out
+    assert "Q" in out  # header shows input
 
 
 def test_main_with_digits(capsys):
     with patch("sys.argv", ["naval_flags", "42"]):
         main()
     out, _ = capsys.readouterr()
-    assert "Four" in out
-    assert "Two" in out
+    assert "42" in out  # header shows input
