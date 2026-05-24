@@ -28,7 +28,7 @@ _ASCII_CHARS: dict[str, str] = {
 
 # Default render grid dimensions
 _ROWS: int = 6
-_COLS: int = 10
+_COLS: int = 8
 
 # Thresholds used by shape-pattern factories
 _SALTIRE_THRESHOLD: float = 0.2
@@ -375,27 +375,32 @@ def render_flag(
 
 
 def display_text(text: str, ascii_mode: bool = False) -> None:
-    """Render and print ICS flags for each character in text.
+    """Render and print ICS flags for each character in text, side by side.
 
-    A-Z and 0-9 are rendered as flags. Spaces insert a blank-line separator.
-    Unrecognised characters are silently skipped.
+    A-Z and 0-9 are rendered as flags displayed left-to-right on the same
+    rows. Spaces create a visual word gap. The input text is shown as a
+    header. Unrecognised characters are silently skipped.
 
     Args:
         text: Input string to convert to flags.
         ascii_mode: If True, use monochrome ASCII output (NO_COLOR compatible).
     """
     valid = [ch.upper() for ch in text if ch.upper() in FLAG_PATTERNS or ch == " "]
-    if not valid:
+    if not any(ch != " " for ch in valid):
         print("No valid characters to display. Supported: A-Z, 0-9.")
         return
-    for ch in valid:
-        if ch == " ":
-            print()
-            continue
-        for line in render_flag(ch, ascii_mode=ascii_mode):
-            print(line)
-        print(f" {ch} - {PHONETIC_NAMES.get(ch, ch)}")
-        print()
+
+    print(text.upper())
+    print()
+
+    word_gap = "      "  # 3-cell visual gap for word spaces (wider than flag separator)
+    grids: list[list[str]] = [
+        [word_gap] * _ROWS if ch == " " else render_flag(ch, ascii_mode=ascii_mode)
+        for ch in valid
+    ]
+
+    for row_idx in range(_ROWS):
+        print(" ".join(g[row_idx] for g in grids))
 
 
 # ---------------------------------------------------------------------------
