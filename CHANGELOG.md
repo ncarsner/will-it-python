@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [Unreleased] — naval-flags (PR #8)
+## [Unreleased] — naval-flags (PR #8, merged 2026-05-24)
 
 ### Added
 
@@ -16,6 +16,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - 36 ICS reference SVGs sourced from Wikimedia Commons stored in
   `assets/naval_flags/`
 - 103 tests with 100% branch coverage
+
+### Changed
+
+- Flags now render left-to-right on the same rows instead of stacking
+  vertically; input text is printed as a header above the flags
+- Word spaces create a 3-cell visual gap between flag groups
+- Removed per-flag phonetic label (CLI is a translator, not a glossary)
+- Reduced flag width from 20 to 16 characters (`_COLS` 10 → 8)
 
 ---
 

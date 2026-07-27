@@ -30,7 +30,8 @@ uv run naval_flags --ascii HELLO
 
 - Letters A-Z (rendered as ICS phonetic alphabet flags: Alfa through Zulu)
 - Digits 0-9 (ICS numeral flags: Zero through Niner)
-- Spaces insert a blank-line separator between flag groups
+- Flags render left-to-right on the same rows; the input text is printed as a header above them
+- Spaces insert a 3-cell visual gap between flag groups (no phonetic labels shown)
 - Unknown characters are silently skipped
 
 ### Flag images
