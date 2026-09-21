@@ -203,7 +203,15 @@ def test_page_supports_reader_views():
     page = server.read_asset("index.html")
     css = server.read_asset("app.css")
     assert b'<meta name="description"' in page
-    assert b'<article class="page">' in page
+    # The summary is the only <article>, so reader views pick it (text only)
+    # instead of the header with its inert copy of the nation dropdown.
+    assert page.count(b"<article") == 1
+    article = page.split(b'<article class="reader-summary"', 1)[1].split(b"</article>")[
+        0
+    ]
+    assert b'id="summary-body"' in article
+    assert b"<select" not in article
+    assert b"<button" not in article
     assert b'id="summary-body"' in page
     # The summary must be clipped, not display:none, or reader views drop it.
     rule = css.split(b".reader-summary {", 1)[1].split(b"}", 1)[0]
@@ -250,3 +258,10 @@ def test_page_with_invalid_query_is_served_unfilled(base_url):
 def test_api_state_blank_selection_is_empty(base_url):
     _, _, body = get(base_url + "/api/state?sel=&country=US")
     assert json.loads(body)["selection"] == []
+
+
+def test_header_counts_have_real_spaces():
+    # CSS margins alone produced "peopleon Earth" in reader views.
+    script = server.read_asset("app.js")
+    assert b'</span> <span class="muted">on Earth</span>' in script
+    assert b"` \xc2\xb7 ${d.nation.odds}`" in script
