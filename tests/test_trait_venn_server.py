@@ -208,3 +208,19 @@ def test_page_supports_reader_views():
     rule = css.split(b".reader-summary {", 1)[1].split(b"}", 1)[0]
     assert b"clip" in rule
     assert b"display" not in rule
+
+
+def test_diagram_svg_uses_concrete_colors():
+    # Reader views copy the SVG without the stylesheet; CSS variables in SVG
+    # paint attributes then resolve to black.
+    script = server.read_asset("app.js")
+    for pattern in (b'fill="var(--', b'stroke="var(--', b'style="fill:var(--'):
+        assert pattern not in script
+    assert b"getComputedStyle" in script
+
+
+def test_text_view_toggle_and_summary_in_stage():
+    page = server.read_asset("index.html").decode()
+    assert 'id="text-view" aria-pressed="false"' in page
+    stage = page.split('<section class="stage"', 1)[1].split("</main>", 1)[0]
+    assert 'id="summary-body"' in stage

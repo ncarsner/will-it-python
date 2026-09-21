@@ -20,7 +20,8 @@
         <span class="muted" id="nation-odds"></span>
       </p>
     </div>
-    <p class="meta"><span id="selected-count"></span> <button type="button" class="linkbtn" id="clear">Clear all</button></p>
+    <p class="meta"><span id="selected-count"></span> <button type="button" class="linkbtn" id="clear">Clear all</button>
+      · <button type="button" class="linkbtn" id="text-view" aria-pressed="false">Text view</button></p>
   </header>
 
   <main class="grid">
@@ -33,6 +34,13 @@
     <section class="stage" aria-label="Venn diagram of selected traits">
       <div class="venn" id="venn"></div>
       <aside class="inspector" id="inspector" aria-live="polite"></aside>
+      <!-- Text version of the result: shown by "Text view"; otherwise visually
+           hidden with clipping (not display:none) so browser reader views and
+           screen readers keep it. -->
+      <section class="reader-summary" id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">Summary</h2>
+        <div id="summary-body"></div>
+      </section>
     </section>
 
     <section class="col" aria-labelledby="unconventional-h">
@@ -46,13 +54,6 @@
     <p id="sources"></p>
     <p>Traits assumed independent except where they depend on gender (color blindness, height, migraines).</p>
   </footer>
-
-  <!-- Text version of the result for reader views and screen readers. Visually
-       hidden with clipping (not display:none) so reader views keep it. -->
-  <section class="reader-summary" id="summary" aria-labelledby="summary-h">
-    <h2 id="summary-h">Summary</h2>
-    <div id="summary-body"></div>
-  </section>
 </article>
 <script src="/static/app.js"></script>
 </body>

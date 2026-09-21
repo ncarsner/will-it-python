@@ -11,6 +11,7 @@ const ui = {
   selection: [],
   country: "US",
   open: DEFAULT_OPEN,
+  textView: false,
   data: null,
   hover: 0,
 };
@@ -18,6 +19,14 @@ const ui = {
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 const slotColor = (slot) => `var(--c${slot})`;
+// Concrete colors for the SVG. Reader views copy the SVG without the page's
+// stylesheet, so CSS variables there would resolve to black.
+function palette() {
+  const css = getComputedStyle(document.documentElement);
+  const get = (name) => css.getPropertyValue(name).trim();
+  return { bg: get("--bg"), fg: get("--fg"), muted: get("--muted"), card: get("--card"),
+           slots: [0, 1, 2, 3, 4].map((i) => get(`--c${i}`)) };
+}
 const dots = (slots) => slots.map((s) => `<span class="dot" style="background:${slotColor(s)}"></span>`).join("");
 
 // ---------------------------------------------------------------------------
@@ -60,6 +69,7 @@ async function load(toggle) {
   const url = new URL(location.href);
   url.searchParams.set("sel", ui.selection.join(","));
   url.searchParams.set("country", ui.country);
+  if (ui.textView) url.searchParams.set("view", "text"); else url.searchParams.delete("view");
   history.replaceState(null, "", url);
   render();
 }
@@ -83,6 +93,9 @@ function render() {
   renderNations();
   $("selected-count").textContent = `${d.selection.length}/${d.max} traits`;
   $("clear").hidden = !any;
+  $("text-view").setAttribute("aria-pressed", String(ui.textView));
+  $("text-view").textContent = ui.textView ? "Diagram view" : "Text view";
+  document.querySelector(".page").classList.toggle("text-view", ui.textView);
   $("conventional-note").textContent = `One per row · % shown for ${d.countryName}`;
 
   $("conventional").innerHTML = d.categories.filter((c) => c.side === "conventional").map(groupHtml).join("");
@@ -185,16 +198,18 @@ function renderDiagram() {
     host.innerHTML = `<div class="empty">Pick at least one trait.</div>`;
     return;
   }
-  const text = (x, y, s, attrs = "") => `<text x="${x}" y="${y}" text-anchor="middle" ${attrs}>${esc(s)}</text>`;
+  const pal = palette();
+  const text = (x, y, s, attrs = "", fill = pal.fg) =>
+    `<text x="${x}" y="${y}" text-anchor="middle" fill="${fill}" ${attrs}>${esc(s)}</text>`;
   let labels = "";
   for (const l of g.labels) {
-    labels += text(l.x, l.y - 4, l.name, `font-size="15" font-weight="700" style="fill:${slotColor(l.slot)}"`);
+    labels += text(l.x, l.y - 4, l.name, `font-size="15" font-weight="700"`, pal.slots[l.slot]);
     if (l.pct) labels += text(l.x, l.y + 14, l.pct, `font-size="13"`);
   }
   const b = g.badge;
   if (b) {
-    labels += `<circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="var(--card)" stroke="var(--fg)" stroke-width="1.5"/>`;
-    labels += text(b.x, b.y - b.r * 0.34, `ALL ${b.sets}`, `font-size="9" font-weight="700" letter-spacing=".1em" style="fill:var(--muted)"`);
+    labels += `<circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="${pal.card}" stroke="${pal.fg}" stroke-width="1.5"/>`;
+    labels += text(b.x, b.y - b.r * 0.34, `ALL ${b.sets}`, `font-size="9" font-weight="700" letter-spacing=".1em"`, pal.muted);
     if (b.bottom) {
       labels += text(b.x, b.y + 1, b.top, `font-size="12"`);
       const size = Math.min(18, (2 * b.r - 12) / (b.bottom.length * 0.58));
@@ -207,7 +222,8 @@ function renderDiagram() {
   host.innerHTML = `<svg viewBox="0 0 ${g.size} ${g.size}" role="img" tabindex="0"
       aria-label="Venn diagram of ${esc(d.selection.length)} traits; everyone in the center is ${esc(center.nation.odds)} in ${esc(d.countryName)}">
     <defs>${g.ellipses.map((e, i) => `<clipPath id="clip${i}"><ellipse ${ellipseAttrs(e)}/></clipPath>`).join("")}<mask id="hl-mask"></mask></defs>
-    ${g.ellipses.map((e, i) => `<ellipse ${ellipseAttrs(e)} style="fill:${slotColor(i)};stroke:${slotColor(i)}" fill-opacity=".16" stroke-width="2.5"/>`).join("")}
+    <rect width="${g.size}" height="${g.size}" fill="${pal.bg}"/>
+    ${g.ellipses.map((e, i) => `<ellipse ${ellipseAttrs(e)} fill="${pal.slots[i]}" stroke="${pal.slots[i]}" fill-opacity=".16" stroke-width="2.5"/>`).join("")}
     <g id="hl"></g>${labels}</svg>`;
 
   const svg = host.querySelector("svg");
@@ -241,7 +257,7 @@ function setHover(mask) {
   } else {
     mk.innerHTML = `<rect width="${g.size}" height="${g.size}" fill="#fff"/>` +
       g.ellipses.map((e, i) => (mask >> i & 1) ? "" : `<ellipse ${ellipseAttrs(e)} fill="#000"/>`).join("");
-    let inner = `<rect width="${g.size}" height="${g.size}" fill="var(--fg)" fill-opacity=".28" mask="url(#hl-mask)"/>`;
+    let inner = `<rect width="${g.size}" height="${g.size}" fill="${palette().fg}" fill-opacity=".28" mask="url(#hl-mask)"/>`;
     g.ellipses.forEach((_, i) => { if (mask >> i & 1) inner = `<g clip-path="url(#clip${i})">${inner}</g>`; });
     hl.innerHTML = inner;
   }
@@ -292,10 +308,22 @@ document.addEventListener("click", (ev) => {
   }
 });
 $("clear").addEventListener("click", () => { ui.selection = []; load(); });
+// In-app text view: the same summary shown in place of the diagram. Unlike a
+// browser reader view (a one-time snapshot), it updates with every change.
+$("text-view").addEventListener("click", () => {
+  ui.textView = !ui.textView;
+  const url = new URL(location.href);
+  if (ui.textView) url.searchParams.set("view", "text"); else url.searchParams.delete("view");
+  history.replaceState(null, "", url);
+  render();
+});
+// Re-draw the SVG with the new concrete colors when the OS theme changes.
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (ui.data) renderDiagram(); });
 $("nation").addEventListener("change", (ev) => { ui.country = ev.target.value; load(); });
 setInterval(tick, 1000);
 
 const params = new URLSearchParams(location.search);
 ui.selection = params.has("sel") ? params.get("sel").split(",").filter(Boolean) : DEFAULT_SELECTION;
 ui.country = params.get("country") || "US";
+ui.textView = params.get("view") === "text";
 load();

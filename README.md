@@ -76,9 +76,11 @@ The selection and nation are kept in the page URL (`?sel=female,left,green&count
 
 Traits in each category are sorted from most to least common for the selected nation, except age brackets, which run youngest to oldest. The diagram, chips, and inspector use the selected nation's prevalence; the headline is worldwide.
 
-### Reader view, screen readers, and printing
+### Text view, reader views, and printing
 
-The page includes a text summary of the current result: the headline, counts for the selected nation and the world, the selected traits, and a table of every intersection. It is visually hidden with clipping rather than `display: none`, so browser reader views (Safari Reader, Firefox Reader View) and screen readers keep it, and it is shown when printing in place of the controls. The document title also updates with the headline.
+**Text view** (header link, or `?view=text` in the URL) replaces the diagram with a text summary of the current result: the headline, counts for the selected nation and the world, the selected traits, and a table of every intersection. It updates immediately as traits or the nation change.
+
+Outside text view, the same summary is visually hidden with clipping rather than `display: none`, so browser reader views (Safari Reader, Firefox Reader View) and screen readers still pick it up, and printing shows it in place of the controls. The diagram is drawn with concrete colors so it keeps its colors when a reader view copies it. Browser reader views are a snapshot taken when they open; reopen them after changing the selection, or use text view for a live version.
 
 ### Calculations
 
