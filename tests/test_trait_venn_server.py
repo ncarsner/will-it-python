@@ -67,16 +67,16 @@ def test_unknown_paths_404(base_url, path):
 
 def test_api_state(base_url):
     status, ctype, body = get(
-        base_url + "/api/state?sel=woman,left&country=US&toggle=green"
+        base_url + "/api/state?sel=female,left&country=US&toggle=green"
     )
     data = json.loads(body)
     assert (status, ctype) == (200, "application/json")
-    assert data["selection"] == ["woman", "left", "green"]
+    assert data["selection"] == ["female", "left", "green"]
     assert data["population"]["source"].startswith("approximate projection")
 
 
 def test_api_state_rejects_bad_input(base_url):
-    status, _, body = get(base_url + "/api/state?sel=man,woman")
+    status, _, body = get(base_url + "/api/state?sel=male,female")
     assert status == 400
     assert "exclusive group" in json.loads(body)["error"]
 

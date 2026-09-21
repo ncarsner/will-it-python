@@ -4,7 +4,7 @@
 "use strict";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
-const DEFAULT_SELECTION = ["woman", "left", "green"];
+const DEFAULT_SELECTION = ["female", "left", "green"];
 const DEFAULT_OPEN = "Senses & mind";
 
 const ui = {

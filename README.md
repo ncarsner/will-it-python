@@ -64,21 +64,21 @@ uv run trait_venn
 uv run python3 -m will_it_python.trait_venn
 ```
 
-The selection and nation are kept in the page URL (`?sel=woman,left,green&country=US`), so a combination can be bookmarked or shared.
+The selection and nation are kept in the page URL (`?sel=female,left,green&country=US`), so a combination can be bookmarked or shared.
 
 ### Layout
 
 - **Header** — "Someone who is … is **1 in N** worldwide", expected counts on Earth and in the selected nation, and the nation selector (United States first, then all others alphabetically).
-- **Left column, Conventional** — gender, handedness, eye color, hair color, blood type, and everyday traits; one choice per exclusive row.
+- **Left column, Conventional** — gender, age, handedness, eye color, hair color, blood type, where you live, and everyday traits; one choice per exclusive row.
 - **Center** — the Venn diagram (circles for 1–3 traits, ellipses for 4–5). Hover a region, or focus the diagram and use the arrow keys, to inspect it.
-- **Right column, Less conventional** — senses & mind, health, genetic quirks, and birth, as drill-down categories.
+- **Right column, Less conventional** — senses & mind, health, genetic quirks, birth, lifestyle, and rare experiences, as drill-down categories (one open at a time).
 - **Inspector (lower right)** — the hovered region, or the all-traits center by default: odds, share, "only these" odds, and expected counts.
 
 Traits in each category are sorted from most to least common for the selected nation. The diagram, chips, and inspector use the selected nation's prevalence; the headline is worldwide.
 
 ### Calculations
 
-- Traits are treated as independent conditional on gender: P = Σ_g P(g) · Π P(trait | g). Color blindness, height over 6 ft, and migraines carry gender-specific prevalence.
+- Traits are treated as independent conditional on gender (female/male): P = Σ_g P(g) · Π P(trait | g). Color blindness, height over 6 ft, and migraines carry gender-specific prevalence.
 - Odds are shown as "1 in int(1/p)" for p < 0.2, otherwise as the simplest fraction k/n (n ≤ 20) within 10% (e.g., "3 in 4").
 - Percentages are omitted for combinations rarer than 1 in 1,000,000.
 - Expected counts are ⌊population × p⌋; below one person the app shows "statistically nobody" with the expected value.

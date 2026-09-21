@@ -24,27 +24,27 @@ MINUS = "\u2212"  # blood-type labels use the true minus sign
 
 
 def test_can_add_below_limit_and_group_swap_at_limit():
-    full = ("man", "left", "green", "red", "cb")
-    assert can_add(("man",), TRAITS_BY_ID["pitch"])
+    full = ("male", "left", "green", "red", "cb")
+    assert can_add(("male",), TRAITS_BY_ID["pitch"])
     assert can_add(full, TRAITS_BY_ID["blue"])
     assert not can_add(full, TRAITS_BY_ID["pitch"])
     assert not can_add(full, TRAITS_BY_ID["blood_o_pos"])
 
 
 def test_toggle_removes_active_trait():
-    assert toggle(("man", "left"), "man") == ("left",)
+    assert toggle(("male", "left"), "male") == ("left",)
 
 
 def test_toggle_replaces_within_group_in_place():
-    assert toggle(("man", "left"), "ambi") == ("man", "ambi")
-    assert toggle(("man", "left"), "woman") == ("woman", "left")
+    assert toggle(("male", "left"), "ambi") == ("male", "ambi")
+    assert toggle(("male", "left"), "female") == ("female", "left")
 
 
 def test_toggle_appends_until_limit():
-    assert toggle(("man",), "pitch") == ("man", "pitch")
-    full = ("man", "left", "green", "red", "cb")
+    assert toggle(("male",), "pitch") == ("male", "pitch")
+    full = ("male", "left", "green", "red", "cb")
     assert toggle(full, "pitch") == full
-    assert toggle(full, "blue") == ("man", "left", "blue", "red", "cb")
+    assert toggle(full, "blue") == ("male", "left", "blue", "red", "cb")
 
 
 def test_parse_query_defaults():
@@ -53,18 +53,18 @@ def test_parse_query_defaults():
 
 def test_parse_query_valid_with_whitespace_and_toggle():
     request = parse_query(
-        {"sel": [" man , left ,"], "country": ["JP"], "toggle": ["green"]}
+        {"sel": [" male , left ,"], "country": ["JP"], "toggle": ["green"]}
     )
-    assert request == Request(("man", "left", "green"), "JP")
+    assert request == Request(("male", "left", "green"), "JP")
 
 
 @pytest.mark.parametrize(
     ("query", "message"),
     [
         ({"sel": ["nope"]}, "unknown trait"),
-        ({"sel": ["man,man"]}, "duplicate"),
+        ({"sel": ["male,male"]}, "duplicate"),
         ({"sel": ["left,green,red,cb,pitch,syn"]}, "at most 5"),
-        ({"sel": ["man,woman"]}, "exclusive group"),
+        ({"sel": ["male,female"]}, "exclusive group"),
         ({"country": ["XX"]}, "unknown country"),
         ({"toggle": ["nope"]}, "unknown trait id"),
     ],
@@ -161,9 +161,9 @@ def test_countries_us_first_then_alphabetical():
 
 
 def test_state_headline_and_scopes():
-    s = build(["woman", "left", "green"])
+    s = build(["female", "left", "green"])
     assert s["headline"] == {
-        "is": "a woman, left-handed and green-eyed",
+        "is": "female, left-handed and green-eyed",
         "has": "",
         "odds": calc.ratio(0.496 * 0.10 * 0.02),
     }
@@ -188,7 +188,7 @@ def test_state_categories_sorted_by_nation_prevalence():
 
 
 def test_state_chip_slots_counts_and_disabled_at_limit():
-    s = build(["man", "left", "green", "red", "cb"])
+    s = build(["male", "left", "green", "red", "cb"])
     chips = {t["id"]: t for c in s["categories"] for t in c["traits"]}
     assert chips["green"]["slot"] == 2
     assert chips["pitch"]["enabled"] is False
@@ -199,15 +199,15 @@ def test_state_chip_slots_counts_and_disabled_at_limit():
 
 
 def test_state_diagram_labels_use_nation_prevalence():
-    s = build(["woman", "green", "blood_o_neg"])
+    s = build(["female", "green", "blood_o_neg"])
     labels = {label["name"]: label["pct"] for label in s["diagram"]["labels"]}
-    assert labels == {"Woman": "50.5%", "Green eyes": "9%", f"Blood O{MINUS}": "6.6%"}
+    assert labels == {"Female": "50.5%", "Green eyes": "9%", f"Blood O{MINUS}": "6.6%"}
     assert len(s["diagram"]["ellipses"]) == 3
     assert s["diagram"]["badge"]["sets"] == 3
 
 
 def test_state_regions_cover_every_mask():
-    s = build(["man", "cb"])
+    s = build(["male", "cb"])
     regions = {r["mask"]: r for r in s["regions"]}
     assert set(regions) == {1, 2, 3}
     center = regions[3]
@@ -217,7 +217,7 @@ def test_state_regions_cover_every_mask():
 
 
 def test_state_badge_splits_odds():
-    badge = build(["man", "tall", "blood_o_neg", "green", "syn"])["diagram"]["badge"]
+    badge = build(["male", "tall", "blood_o_neg", "green", "syn"])["diagram"]["badge"]
     assert badge["top"] == "1 in"
     assert badge["bottom"].endswith("K") or badge["bottom"].endswith("M")
     assert badge["r"] == 36

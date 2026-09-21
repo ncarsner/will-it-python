@@ -62,7 +62,7 @@ def test_exclusive_groups_sum_to_about_one():
 
 def test_gender_traits_cover_every_gender():
     assert set(GENDER_TRAITS) == set(Gender)
-    assert GENDER_TRAITS[Gender.WOMAN].id == "woman"
+    assert GENDER_TRAITS[Gender.FEMALE].id == "female"
     assert CATEGORIES[0].name == "Gender"
 
 
@@ -146,3 +146,31 @@ def test_badge_radius_capped_by_layout_size():
 def test_three_set_layout_is_symmetric():
     xs = sorted(e.cx for e in geometry.LAYOUTS[3])
     assert math.isclose(xs[0] + xs[2], 600)
+
+
+# ---------------------------------------------------------------------------
+# Labels
+# ---------------------------------------------------------------------------
+
+
+def test_gender_options_are_female_and_male():
+    names = [t.name for t in TRAITS if t.group == "gender"]
+    assert sorted(names) == ["Female", "Male"]
+    assert TRAITS_BY_ID["female"].is_phrase == "female"
+
+
+def test_birth_date_chips_read_as_events():
+    assert TRAITS_BY_ID["xmas"].short == "on Dec 25"
+    assert TRAITS_BY_ID["leap"].short == "on Feb 29"
+    assert TRAITS_BY_ID["leap"].name == "Born on Feb 29"
+
+
+def test_born_in_the_caul_removed():
+    assert "caul" not in TRAITS_BY_ID
+    assert all("caul" not in t.name.lower() for t in TRAITS)
+
+
+def test_age_brackets_are_exclusive_and_named_consistently():
+    ages = [t for t in TRAITS if t.category == "Age"]
+    assert {t.group for t in ages} == {"age"}
+    assert all(t.name.startswith("Age ") for t in ages)

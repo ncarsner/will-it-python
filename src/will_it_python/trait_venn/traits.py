@@ -26,8 +26,8 @@ class Side(StrEnum):
 class Gender(StrEnum):
     """Genders used to condition gender-dependent prevalence."""
 
-    MAN = "man"
-    WOMAN = "woman"
+    FEMALE = "female"
+    MALE = "male"
 
 
 @dataclass(frozen=True, slots=True)
@@ -93,22 +93,26 @@ class Country:
     population: int
 
 
-def _by_gender(man: float, woman: float) -> MappingProxyType[Gender, float]:
+def _by_gender(*, female: float, male: float) -> MappingProxyType[Gender, float]:
     """Return an immutable gender-conditional prevalence mapping."""
-    return MappingProxyType({Gender.MAN: man, Gender.WOMAN: woman})
+    return MappingProxyType({Gender.FEMALE: female, Gender.MALE: male})
 
 
 CATEGORIES: Final[tuple[Category, ...]] = (
     Category("Gender", Side.CONVENTIONAL),
+    Category("Age", Side.CONVENTIONAL),
     Category("Handedness", Side.CONVENTIONAL),
     Category("Eye color", Side.CONVENTIONAL),
     Category("Hair color", Side.CONVENTIONAL),
     Category("Blood type", Side.CONVENTIONAL),
+    Category("Where you live", Side.CONVENTIONAL),
     Category("Everyday", Side.CONVENTIONAL),
     Category("Senses & mind", Side.UNCONVENTIONAL),
     Category("Health", Side.UNCONVENTIONAL),
     Category("Genetic quirks", Side.UNCONVENTIONAL),
     Category("Birth", Side.UNCONVENTIONAL),
+    Category("Lifestyle", Side.UNCONVENTIONAL),
+    Category("Rare experiences", Side.UNCONVENTIONAL),
 )
 
 # (id suffix, label, worldwide, US). Labels use U+2212 MINUS SIGN for display;
@@ -125,33 +129,48 @@ _BLOOD_TYPES: Final = (
     ("ab_neg", f"AB{_MINUS}", 0.004, 0.006),
 )
 
-# Roughly 60 documented people worldwide have superior autobiographical memory.
-_HSAM_CASES: Final = 60
+# (id suffix, label, worldwide, US) age brackets; labels use U+2013 EN DASH.
+_DASH: Final = "\u2013"
+_AGE_BRACKETS: Final = (
+    ("under18", "Under 18", 0.30, 0.22),
+    ("18_34", f"18{_DASH}34", 0.26, 0.22),
+    ("35_54", f"35{_DASH}54", 0.25, 0.25),
+    ("55_64", f"55{_DASH}64", 0.09, 0.13),
+    ("65plus", "65 or older", 0.10, 0.18),
+)
+
 _WORLD_2026: Final = 8_100_000_000
+# Approximate counts of living people, for extremely rare traits.
+_HSAM_CASES: Final = 60  # superior autobiographical memory, documented cases
+_ANTARCTICA_VISITORS: Final = 1_100_000
+_OLYMPIANS: Final = 100_000
+_EVEREST_SUMMITERS: Final = 7_300
+_SPACE_TRAVELERS: Final = 700
+_NOBEL_LAUREATES: Final = 400
 
 TRAITS: Final[tuple[Trait, ...]] = (
     # Gender
     Trait(
-        "man",
+        "female",
         "Gender",
-        "Man",
-        "Man",
-        0.504,
-        us=0.495,
-        group="gender",
-        gender=Gender.MAN,
-        is_phrase="a man",
-    ),
-    Trait(
-        "woman",
-        "Gender",
-        "Woman",
-        "Woman",
+        "Female",
+        "Female",
         0.496,
         us=0.505,
         group="gender",
-        gender=Gender.WOMAN,
-        is_phrase="a woman",
+        gender=Gender.FEMALE,
+        is_phrase="female",
+    ),
+    Trait(
+        "male",
+        "Gender",
+        "Male",
+        "Male",
+        0.504,
+        us=0.495,
+        group="gender",
+        gender=Gender.MALE,
+        is_phrase="male",
     ),
     # Handedness
     Trait(
@@ -314,8 +333,8 @@ TRAITS: Final[tuple[Trait, ...]] = (
         "Over 6 ft",
         0.03,
         us=0.077,
-        by_gender=_by_gender(0.06, 0.004),
-        by_gender_us=_by_gender(0.145, 0.01),
+        by_gender=_by_gender(female=0.004, male=0.06),
+        by_gender_us=_by_gender(female=0.01, male=0.145),
         is_phrase="over 6 ft tall",
     ),
     Trait(
@@ -353,7 +372,7 @@ TRAITS: Final[tuple[Trait, ...]] = (
         "Red-green color blind",
         "Color blind",
         0.045,
-        by_gender=_by_gender(0.08, 0.005),
+        by_gender=_by_gender(female=0.005, male=0.08),
         is_phrase="color blind",
     ),
     Trait(
@@ -428,7 +447,7 @@ TRAITS: Final[tuple[Trait, ...]] = (
         "Migraines",
         "Migraines",
         0.14,
-        by_gender=_by_gender(0.09, 0.19),
+        by_gender=_by_gender(female=0.19, male=0.09),
         has_phrase="migraines",
     ),
     Trait("asthma", "Health", "Asthma", "Asthma", 0.043, us=0.08, has_phrase="asthma"),
@@ -546,7 +565,7 @@ TRAITS: Final[tuple[Trait, ...]] = (
         "leap",
         "Birth",
         "Born on Feb 29",
-        "Feb 29",
+        "on Feb 29",
         1 / 1461,
         is_phrase="a leap-day baby",
     ),
@@ -554,7 +573,7 @@ TRAITS: Final[tuple[Trait, ...]] = (
         "xmas",
         "Birth",
         "Born on Dec 25",
-        "Dec 25",
+        "on Dec 25",
         1 / 365.25,
         is_phrase="a Christmas baby",
     ),
@@ -567,13 +586,234 @@ TRAITS: Final[tuple[Trait, ...]] = (
         us=0.32,
         is_phrase="a C-section baby",
     ),
+    # Age
+    *(
+        Trait(
+            f"age_{key}",
+            "Age",
+            f"Age {label[0].lower()}{label[1:]}",
+            label,
+            p,
+            us=us,
+            group="age",
+            is_phrase=f"{label[0].lower()}{label[1:]}",
+        )
+        for key, label, p, us in _AGE_BRACKETS
+    ),
+    # Where you live
     Trait(
-        "caul",
+        "urban",
+        "Where you live",
+        "Lives in a city or town",
+        "City or town",
+        0.58,
+        us=0.83,
+        group="home",
+        is_phrase="a city dweller",
+    ),
+    Trait(
+        "rural",
+        "Where you live",
+        "Lives in a rural area",
+        "Rural",
+        0.42,
+        us=0.17,
+        group="home",
+        is_phrase="a rural resident",
+    ),
+    # Everyday (additions)
+    Trait(
+        "bilingual",
+        "Everyday",
+        "Speaks two or more languages",
+        "Bilingual",
+        0.43,
+        us=0.22,
+        is_phrase="bilingual",
+    ),
+    Trait(
+        "license",
+        "Everyday",
+        "Has a driver's license",
+        "Driver's license",
+        0.30,
+        us=0.68,
+        has_phrase="a driver's license",
+    ),
+    # Senses & mind (additions)
+    Trait(
+        "misoph",
+        "Senses & mind",
+        "Misophonia",
+        "Misophonia",
+        0.12,
+        has_phrase="misophonia",
+    ),
+    Trait(
+        "lucid",
+        "Senses & mind",
+        "Lucid dreams monthly",
+        "Lucid dreamer",
+        0.23,
+        is_phrase="a lucid dreamer",
+    ),
+    # Health (additions)
+    Trait(
+        "myopia",
+        "Health",
+        "Nearsighted",
+        "Nearsighted",
+        0.30,
+        us=0.40,
+        is_phrase="nearsighted",
+    ),
+    Trait("adhd", "Health", "ADHD", "ADHD", 0.03, us=0.07, has_phrase="ADHD"),
+    Trait(
+        "dyslexia",
+        "Health",
+        "Dyslexia",
+        "Dyslexia",
+        0.07,
+        has_phrase="dyslexia",
+    ),
+    # Genetic quirks (additions)
+    Trait(
+        "dryear",
+        "Genetic quirks",
+        "Dry earwax",
+        "Dry earwax",
+        0.25,
+        us=0.07,
+        has_phrase="dry earwax",
+    ),
+    Trait(
+        "lefteye",
+        "Genetic quirks",
+        "Left-eye dominant",
+        "Left-eye dominant",
+        0.30,
+        is_phrase="left-eye dominant",
+    ),
+    # Birth (additions)
+    Trait(
+        "preterm",
         "Birth",
-        "Born in the caul",
-        "Born in the caul",
-        1 / 80_000,
-        is_phrase="born in the caul",
+        "Born premature",
+        "Premature",
+        0.10,
+        is_phrase="a preemie",
+    ),
+    Trait(
+        "homebirth",
+        "Birth",
+        "Born at home",
+        "At home",
+        0.17,
+        us=0.015,
+        is_phrase="born at home",
+    ),
+    # Lifestyle
+    Trait(
+        "veg",
+        "Lifestyle",
+        "Vegetarian",
+        "Vegetarian",
+        0.08,
+        us=0.05,
+        is_phrase="vegetarian",
+    ),
+    Trait(
+        "nodrink",
+        "Lifestyle",
+        "Doesn't drink alcohol",
+        "Non-drinker",
+        0.55,
+        us=0.38,
+        is_phrase="a non-drinker",
+    ),
+    Trait(
+        "smoker",
+        "Lifestyle",
+        "Smokes tobacco",
+        "Smoker",
+        0.20,
+        us=0.115,
+        is_phrase="a smoker",
+    ),
+    Trait(
+        "morning",
+        "Lifestyle",
+        "Morning person",
+        "Morning person",
+        0.25,
+        is_phrase="a morning person",
+    ),
+    Trait(
+        "meditate",
+        "Lifestyle",
+        "Meditates regularly",
+        "Meditates",
+        0.10,
+        us=0.17,
+        is_phrase="a regular meditator",
+    ),
+    Trait(
+        "marathon",
+        "Lifestyle",
+        "Has finished a marathon",
+        "Marathoner",
+        0.002,
+        us=0.005,
+        is_phrase="a marathon finisher",
+    ),
+    # Rare experiences
+    Trait(
+        "lightning",
+        "Rare experiences",
+        "Struck by lightning",
+        "Struck by lightning",
+        1 / 15_300,
+        has_phrase="been struck by lightning",
+    ),
+    Trait(
+        "antarctica",
+        "Rare experiences",
+        "Visited Antarctica",
+        "Antarctica",
+        _ANTARCTICA_VISITORS / _WORLD_2026,
+        has_phrase="visited Antarctica",
+    ),
+    Trait(
+        "olympian",
+        "Rare experiences",
+        "Olympian",
+        "Olympian",
+        _OLYMPIANS / _WORLD_2026,
+        is_phrase="an Olympian",
+    ),
+    Trait(
+        "everest",
+        "Rare experiences",
+        "Summited Everest",
+        "Everest summit",
+        _EVEREST_SUMMITERS / _WORLD_2026,
+        has_phrase="summited Everest",
+    ),
+    Trait(
+        "space",
+        "Rare experiences",
+        "Been to space",
+        "Space",
+        _SPACE_TRAVELERS / _WORLD_2026,
+        has_phrase="been to space",
+    ),
+    Trait(
+        "nobel",
+        "Rare experiences",
+        "Nobel laureate",
+        "Nobel laureate",
+        _NOBEL_LAUREATES / _WORLD_2026,
+        is_phrase="a Nobel laureate",
     ),
 )
 
