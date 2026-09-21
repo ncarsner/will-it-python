@@ -10,6 +10,7 @@ Routes:
 from __future__ import annotations
 
 import argparse
+import errno
 import json
 import logging
 import threading
@@ -152,7 +153,16 @@ def main(argv: Sequence[str] | None = None) -> None:
     logging.basicConfig(
         level=logging.INFO, format="%(levelname)s %(name)s: %(message)s"
     )
-    server = ThreadingHTTPServer((args.host, args.port), Handler)
+    try:
+        server = ThreadingHTTPServer((args.host, args.port), Handler)
+    except OSError as exc:
+        if exc.errno != errno.EADDRINUSE:
+            raise
+        parser.exit(
+            1,
+            f"trait_venn: port {args.port} on {args.host} is already in use; "
+            "stop the other process or choose another port with --port\n",
+        )
     url = f"http://{args.host}:{server.server_address[1]}/"
     log.info("trait_venn serving %s (Ctrl-C to stop)", url)
     if not args.no_browser:

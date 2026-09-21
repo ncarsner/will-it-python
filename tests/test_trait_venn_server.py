@@ -1,5 +1,6 @@
 """Tests for the trait_venn HTTP server and CLI."""
 
+import errno
 import json
 import runpy
 import threading
@@ -169,3 +170,23 @@ def test_module_entry_point_runs_main():
     with patch.object(server, "main") as main:
         runpy.run_module("will_it_python.trait_venn", run_name="__main__")
     main.assert_called_once_with()
+
+
+def test_main_port_in_use_exits_with_message(capsys):
+    busy = OSError(errno.EADDRINUSE, "Address already in use")
+    with (
+        patch.object(server, "ThreadingHTTPServer", side_effect=busy),
+        pytest.raises(SystemExit) as exit_info,
+    ):
+        server.main(["--port", "8765", "--no-browser"])
+    assert exit_info.value.code == 1
+    assert "port 8765 on 127.0.0.1 is already in use" in capsys.readouterr().err
+
+
+def test_main_other_os_errors_propagate():
+    denied = OSError(errno.EACCES, "Permission denied")
+    with (
+        patch.object(server, "ThreadingHTTPServer", side_effect=denied),
+        pytest.raises(OSError, match="Permission denied"),
+    ):
+        server.main(["--port", "80", "--no-browser"])
