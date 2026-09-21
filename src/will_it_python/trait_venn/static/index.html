@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trait Venn</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<div class="page">
+  <header class="band">
+    <h1 class="hero" id="hero" aria-live="polite"></h1>
+    <div class="pair">
+      <p id="world-count"></p>
+      <p>
+        <span class="big" id="nation-count"></span>
+        <label for="nation" class="muted">in</label>
+        <select id="nation"></select>
+        <span class="muted" id="nation-odds"></span>
+      </p>
+    </div>
+    <p class="meta"><span id="selected-count"></span> <button type="button" class="linkbtn" id="clear">Clear all</button></p>
+  </header>
+
+  <main class="grid">
+    <section class="col" aria-labelledby="conventional-h">
+      <h2 id="conventional-h">Conventional</h2>
+      <p class="note" id="conventional-note"></p>
+      <div id="conventional"></div>
+    </section>
+
+    <section class="stage" aria-label="Venn diagram of selected traits">
+      <div class="venn" id="venn"></div>
+      <aside class="inspector" id="inspector" aria-live="polite"></aside>
+    </section>
+
+    <section class="col" aria-labelledby="unconventional-h">
+      <h2 id="unconventional-h">Less conventional</h2>
+      <p class="note">Open a category to drill down</p>
+      <div id="unconventional"></div>
+    </section>
+  </main>
+
+  <footer class="src">
+    <p id="sources"></p>
+    <p>Traits assumed independent except where they depend on gender (color blindness, height, migraines).</p>
+  </footer>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

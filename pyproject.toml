@@ -18,6 +18,7 @@ traffic = "will_it_python.police_lights:traffic_stop"
 cruise = "will_it_python.police_lights:cruise"
 personalities = "will_it_python.personalities:main"
 naval_flags = "will_it_python.naval_flags:main"
+trait_venn = "will_it_python.trait_venn.server:main"
 
 [tool.ruff]
 line-length = 88
