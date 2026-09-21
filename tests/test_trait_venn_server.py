@@ -190,3 +190,9 @@ def test_main_other_os_errors_propagate():
         pytest.raises(OSError, match="Permission denied"),
     ):
         server.main(["--port", "80", "--no-browser"])
+
+
+def test_stylesheet_hides_collapsed_drill_downs():
+    # Regression: `.chips { display: flex }` overrode the [hidden] attribute,
+    # so collapsed drill-down categories stayed visible.
+    assert b"[hidden] { display: none !important; }" in server.read_asset("app.css")
