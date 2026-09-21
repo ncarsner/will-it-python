@@ -75,11 +75,7 @@ function render() {
   const refocus = focused && (focused.dataset.trait ? `[data-trait="${focused.dataset.trait}"]`
     : focused.dataset.category ? `[data-category="${focused.dataset.category}"]` : null);
 
-  const who = [d.headline.is && `is <strong>${esc(d.headline.is)}</strong>`,
-               d.headline.has && `has <strong>${esc(d.headline.has)}</strong>`].filter(Boolean).join(", and ");
-  $("hero").innerHTML = any
-    ? `Someone who ${who} is <span class="odds">${esc(d.headline.odds)}</span> worldwide.`
-    : "Pick traits on either side to see how rare that person is.";
+  $("hero").innerHTML = headline(d, true);
 
   $("world-count").innerHTML = any ? `<span class="big" id="world-live"></span><span class="muted">on Earth</span>` : "";
   $("nation-count").textContent = "";
@@ -95,8 +91,19 @@ function render() {
   renderDiagram();
   renderInspector();
   renderSources();
+  renderSummary();
   tick();
   if (refocus) document.querySelector(refocus)?.focus();
+}
+
+// Headline sentence as HTML (emphasized) or plain text (title, summary).
+function headline(d, html) {
+  if (!d.selection.length) return "Pick traits on either side to see how rare that person is.";
+  const strong = (t) => (html ? `<strong>${esc(t)}</strong>` : t);
+  const odds = html ? `<span class="odds">${esc(d.headline.odds)}</span>` : d.headline.odds;
+  const who = [d.headline.is && `is ${strong(d.headline.is)}`, d.headline.has && `has ${strong(d.headline.has)}`]
+    .filter(Boolean).join(", and ");
+  return `Someone who ${who} is ${odds} worldwide.`;
 }
 
 function renderNations() {
@@ -131,6 +138,32 @@ function renderSources() {
     : `${d.countryName} population: ${d.population.source} · world: ${d.population.worldSource}`;
   $("sources").textContent =
     `Hover the diagram, or focus it and use ← → to explore regions · diagram & chips use ${d.countryName} shares, headline is worldwide · ${pops}`;
+}
+
+// ---------------------------------------------------------------------------
+// Reader-view summary and document title
+// ---------------------------------------------------------------------------
+function renderSummary() {
+  const d = ui.data, box = $("summary-body");
+  const heroText = headline(d, false);
+  document.title = d.selection.length ? `${heroText} | Trait Venn` : "Trait Venn";
+  if (!d.selection.length) {
+    box.innerHTML = `<p>${esc(heroText)}</p>`;
+    return;
+  }
+  const chips = d.categories.flatMap((c) => c.traits).filter((t) => t.slot !== null).sort((a, b) => a.slot - b.slot);
+  const traits = chips.map((t) => `<li>${esc(t.name)}${t.pct ? `: ${esc(t.pct)} in ${esc(d.countryName)}` : ""}</li>`).join("");
+  const rows = [...d.regions]
+    .sort((a, b) => b.slots.length - a.slots.length || a.mask - b.mask)
+    .map((r) => `<tr><th scope="row">${r.names.map(esc).join(" + ")}</th><td>${esc(r.nation.pct || "—")}</td>` +
+                `<td>${esc(r.nation.odds)}</td><td>${esc(r.nation.count)}</td></tr>`).join("");
+  box.innerHTML = `<p>${esc(heroText)}</p>
+    <p>In ${esc(d.countryName)}: ${esc(d.nation.odds)}, ${esc(d.nation.count)}. On Earth: ${esc(d.world.count)} of ${d.world.population.toLocaleString("en-US")}.</p>
+    <h3>Selected traits</h3><ul>${traits}</ul>
+    <h3>Every intersection in ${esc(d.countryName)}</h3>
+    <table><thead><tr><th scope="col">Traits</th><th scope="col">Share</th><th scope="col">Odds</th><th scope="col">Expected people</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <p>${esc($("sources").textContent)}. Traits assumed independent except where they depend on gender.</p>`;
 }
 
 // ---------------------------------------------------------------------------

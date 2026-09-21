@@ -196,3 +196,15 @@ def test_stylesheet_hides_collapsed_drill_downs():
     # Regression: `.chips { display: flex }` overrode the [hidden] attribute,
     # so collapsed drill-down categories stayed visible.
     assert b"[hidden] { display: none !important; }" in server.read_asset("app.css")
+
+
+def test_page_supports_reader_views():
+    page = server.read_asset("index.html")
+    css = server.read_asset("app.css")
+    assert b'<meta name="description"' in page
+    assert b'<article class="page">' in page
+    assert b'id="summary-body"' in page
+    # The summary must be clipped, not display:none, or reader views drop it.
+    rule = css.split(b".reader-summary {", 1)[1].split(b"}", 1)[0]
+    assert b"clip" in rule
+    assert b"display" not in rule

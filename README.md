@@ -74,7 +74,11 @@ The selection and nation are kept in the page URL (`?sel=female,left,green&count
 - **Right column, Less conventional** — everyday, senses & mind, health, genetic quirks, birth, lifestyle, and rare experiences, as drill-down categories (one open at a time).
 - **Inspector (lower right)** — the hovered region, or the all-traits center by default: odds, share, "only these" odds, and expected counts.
 
-Traits in each category are sorted from most to least common for the selected nation. The diagram, chips, and inspector use the selected nation's prevalence; the headline is worldwide.
+Traits in each category are sorted from most to least common for the selected nation, except age brackets, which run youngest to oldest. The diagram, chips, and inspector use the selected nation's prevalence; the headline is worldwide.
+
+### Reader view, screen readers, and printing
+
+The page includes a text summary of the current result: the headline, counts for the selected nation and the world, the selected traits, and a table of every intersection. It is visually hidden with clipping rather than `display: none`, so browser reader views (Safari Reader, Firefox Reader View) and screen readers keep it, and it is shown when printing in place of the controls. The document title also updates with the headline.
 
 ### Calculations
 
