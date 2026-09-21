@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — venn-diagrams (issue #9)
+
+### Added
+
+- `trait_venn` web app: select 1–5 traits and see a Venn diagram of their
+  prevalence, every intersection, "1 in N" odds, and expected head counts for
+  the world and a selected nation of origin
+- 57 traits in 10 categories, split into conventional (always visible) and
+  less conventional (drill-down) columns; one choice per exclusive group
+- Gender-conditional probability model for color blindness, height, and
+  migraines
+- Tuned 4- and 5-set ellipse layouts that keep the all-traits center small
+- World and US population from the Census Population Clock with a labeled
+  fallback projection; static 2026 estimates for other nations
+- Keyboard exploration of diagram regions and WCAG-oriented focus, contrast,
+  and ARIA state handling
+- 230 tests with 100% branch coverage for the `trait_venn` package
+
+---
+
 ## [Unreleased] — naval-flags (PR #8, merged 2026-05-24)
 
 ### Added
