@@ -25,7 +25,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   fallback projection; static 2026 estimates for other nations
 - Keyboard exploration of diagram regions and WCAG-oriented focus, contrast,
   and ARIA state handling
-- 295 tests with 100% branch coverage for the `trait_venn` package
+- Reader-view support: a clipped text summary (headline, counts, selected
+  traits, table of every intersection), a result-based document title, a
+  meta description, and print styles that show the summary
+- 329 tests with 100% branch coverage for the `trait_venn` package
 
 ---
 

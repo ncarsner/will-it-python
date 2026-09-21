@@ -4,10 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trait Venn</title>
+<meta name="description" content="Estimate how rare a person is from a combination of traits, with a Venn diagram of every intersection and expected head counts worldwide and by nation.">
 <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
-<div class="page">
+<article class="page">
   <header class="band">
     <h1 class="hero" id="hero" aria-live="polite"></h1>
     <div class="pair">
@@ -45,7 +46,14 @@
     <p id="sources"></p>
     <p>Traits assumed independent except where they depend on gender (color blindness, height, migraines).</p>
   </footer>
-</div>
+
+  <!-- Text version of the result for reader views and screen readers. Visually
+       hidden with clipping (not display:none) so reader views keep it. -->
+  <section class="reader-summary" id="summary" aria-labelledby="summary-h">
+    <h2 id="summary-h">Summary</h2>
+    <div id="summary-body"></div>
+  </section>
+</article>
 <script src="/static/app.js"></script>
 </body>
 </html>
