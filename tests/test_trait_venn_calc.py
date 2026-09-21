@@ -23,19 +23,19 @@ def test_prevalence_falls_back_to_world_without_override():
 
 
 def test_conditional_on_gender_options():
-    assert calc.conditional(T["man"], Gender.MAN, None) == 1.0
-    assert calc.conditional(T["man"], Gender.WOMAN, None) == 0.0
+    assert calc.conditional(T["male"], Gender.MALE, None) == 1.0
+    assert calc.conditional(T["male"], Gender.FEMALE, None) == 0.0
 
 
 def test_conditional_gender_dependent_trait():
-    assert calc.conditional(T["cb"], Gender.MAN, None) == 0.08
-    assert calc.conditional(T["cb"], Gender.MAN, "US") == 0.08  # no US table
-    assert calc.conditional(T["tall"], Gender.MAN, None) == 0.06
-    assert calc.conditional(T["tall"], Gender.MAN, "US") == 0.145
+    assert calc.conditional(T["cb"], Gender.MALE, None) == 0.08
+    assert calc.conditional(T["cb"], Gender.MALE, "US") == 0.08  # no US table
+    assert calc.conditional(T["tall"], Gender.MALE, None) == 0.06
+    assert calc.conditional(T["tall"], Gender.MALE, "US") == 0.145
 
 
 def test_conditional_plain_trait_is_marginal():
-    assert calc.conditional(T["blue"], Gender.WOMAN, "US") == 0.27
+    assert calc.conditional(T["blue"], Gender.FEMALE, "US") == 0.27
 
 
 def test_region_probability_independent_traits_multiply():
@@ -48,7 +48,7 @@ def test_region_probability_independent_traits_multiply():
 
 
 def test_region_probability_gender_conditioning():
-    traits = [T["man"], T["cb"]]
+    traits = [T["male"], T["cb"]]
     assert calc.region_probability(traits, 0b11, None).inclusive == pytest.approx(
         0.504 * 0.08
     )
