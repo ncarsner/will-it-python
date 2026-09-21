@@ -69,9 +69,9 @@ The selection and nation are kept in the page URL (`?sel=female,left,green&count
 ### Layout
 
 - **Header** — "Someone who is … is **1 in N** worldwide", expected counts on Earth and in the selected nation, and the nation selector (United States first, then all others alphabetically).
-- **Left column, Conventional** — gender, age, handedness, eye color, hair color, blood type, where you live, and everyday traits; one choice per exclusive row.
+- **Left column, Conventional** — gender, age, handedness, eye color, hair color, blood type, and where you live; one choice per row.
 - **Center** — the Venn diagram (circles for 1–3 traits, ellipses for 4–5). Hover a region, or focus the diagram and use the arrow keys, to inspect it.
-- **Right column, Less conventional** — senses & mind, health, genetic quirks, birth, lifestyle, and rare experiences, as drill-down categories (one open at a time).
+- **Right column, Less conventional** — everyday, senses & mind, health, genetic quirks, birth, lifestyle, and rare experiences, as drill-down categories (one open at a time).
 - **Inspector (lower right)** — the hovered region, or the all-traits center by default: odds, share, "only these" odds, and expected counts.
 
 Traits in each category are sorted from most to least common for the selected nation. The diagram, chips, and inspector use the selected nation's prevalence; the headline is worldwide.

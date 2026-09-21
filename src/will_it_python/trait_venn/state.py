@@ -36,14 +36,12 @@ def ordered_countries() -> list[Json]:
 
 
 def _categories(selection: tuple[str, ...], country: str) -> list[Json]:
-    """Return categories with traits sorted most to least common."""
+    """Return categories with traits in display order (see Category.by_prevalence)."""
     result = []
     for category in CATEGORIES:
-        members = sorted(
-            (t for t in TRAITS if t.category == category.name),
-            key=lambda t: calc.prevalence(t, country),
-            reverse=True,
-        )
+        members = [t for t in TRAITS if t.category == category.name]
+        if category.by_prevalence:
+            members.sort(key=lambda t: calc.prevalence(t, country), reverse=True)
         traits = []
         for t in members:
             slot = selection.index(t.id) if t.id in selection else None

@@ -37,10 +37,13 @@ class Category:
     Attributes:
         name: Display name, e.g. ``"Eye color"``.
         side: Column the category is rendered in.
+        by_prevalence: Sort traits most to least common; when False, keep
+            their natural order (e.g. age brackets youngest to oldest).
     """
 
     name: str
     side: Side
+    by_prevalence: bool = True
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,13 +103,13 @@ def _by_gender(*, female: float, male: float) -> MappingProxyType[Gender, float]
 
 CATEGORIES: Final[tuple[Category, ...]] = (
     Category("Gender", Side.CONVENTIONAL),
-    Category("Age", Side.CONVENTIONAL),
+    Category("Age", Side.CONVENTIONAL, by_prevalence=False),
     Category("Handedness", Side.CONVENTIONAL),
     Category("Eye color", Side.CONVENTIONAL),
     Category("Hair color", Side.CONVENTIONAL),
     Category("Blood type", Side.CONVENTIONAL),
     Category("Where you live", Side.CONVENTIONAL),
-    Category("Everyday", Side.CONVENTIONAL),
+    Category("Everyday", Side.UNCONVENTIONAL),
     Category("Senses & mind", Side.UNCONVENTIONAL),
     Category("Health", Side.UNCONVENTIONAL),
     Category("Genetic quirks", Side.UNCONVENTIONAL),
@@ -177,7 +180,7 @@ TRAITS: Final[tuple[Trait, ...]] = (
         "right",
         "Handedness",
         "Right-handed",
-        "Right-handed",
+        "Right",
         0.89,
         group="hand",
         is_phrase="right-handed",
@@ -186,7 +189,7 @@ TRAITS: Final[tuple[Trait, ...]] = (
         "left",
         "Handedness",
         "Left-handed",
-        "Left-handed",
+        "Left",
         0.10,
         group="hand",
         is_phrase="left-handed",
@@ -631,15 +634,6 @@ TRAITS: Final[tuple[Trait, ...]] = (
         us=0.22,
         is_phrase="bilingual",
     ),
-    Trait(
-        "license",
-        "Everyday",
-        "Has a driver's license",
-        "Driver's license",
-        0.30,
-        us=0.68,
-        has_phrase="a driver's license",
-    ),
     # Senses & mind (additions)
     Trait(
         "misoph",
@@ -814,6 +808,136 @@ TRAITS: Final[tuple[Trait, ...]] = (
         "Nobel laureate",
         _NOBEL_LAUREATES / _WORLD_2026,
         is_phrase="a Nobel laureate",
+    ),
+    # Senses & mind (further additions)
+    Trait(
+        "hyperph",
+        "Senses & mind",
+        "Hyperphantasia",
+        "Hyperphantasia",
+        0.03,
+        has_phrase="hyperphantasia",
+    ),
+    Trait(
+        "faceblind",
+        "Senses & mind",
+        "Face blindness (prosopagnosia)",
+        "Face blindness",
+        0.025,
+        is_phrase="face-blind",
+    ),
+    Trait(
+        "anosmia",
+        "Senses & mind",
+        "No sense of smell (anosmia)",
+        "No sense of smell",
+        0.05,
+        has_phrase="no sense of smell",
+    ),
+    Trait(
+        "hyperac",
+        "Senses & mind",
+        "Sound sensitivity (hyperacusis)",
+        "Hyperacusis",
+        0.08,
+        has_phrase="hyperacusis",
+    ),
+    Trait(
+        "motion",
+        "Senses & mind",
+        "Prone to motion sickness",
+        "Motion sickness",
+        0.30,
+        is_phrase="prone to motion sickness",
+    ),
+    Trait(
+        "mirror",
+        "Senses & mind",
+        "Mirror-touch synesthesia",
+        "Mirror-touch",
+        0.016,
+        has_phrase="mirror-touch synesthesia",
+    ),
+    Trait(
+        "dyscalc",
+        "Senses & mind",
+        "Dyscalculia",
+        "Dyscalculia",
+        0.05,
+        has_phrase="dyscalculia",
+    ),
+    # Health (further additions)
+    Trait(
+        "t2d",
+        "Health",
+        "Type 2 diabetes",
+        "Type 2 diabetes",
+        0.06,
+        us=0.11,
+        has_phrase="type 2 diabetes",
+    ),
+    Trait(
+        "hbp",
+        "Health",
+        "High blood pressure",
+        "High blood pressure",
+        0.25,
+        us=0.30,
+        has_phrase="high blood pressure",
+    ),
+    Trait(
+        "eczema",
+        "Health",
+        "Eczema",
+        "Eczema",
+        0.07,
+        us=0.10,
+        has_phrase="eczema",
+    ),
+    Trait(
+        "psoriasis",
+        "Health",
+        "Psoriasis",
+        "Psoriasis",
+        0.02,
+        us=0.03,
+        has_phrase="psoriasis",
+    ),
+    Trait(
+        "autism",
+        "Health",
+        "Autism",
+        "Autism",
+        0.01,
+        us=0.028,
+        is_phrase="autistic",
+    ),
+    Trait(
+        "epilepsy",
+        "Health",
+        "Epilepsy",
+        "Epilepsy",
+        0.006,
+        us=0.012,
+        has_phrase="epilepsy",
+    ),
+    Trait(
+        "tinnitus",
+        "Health",
+        "Chronic tinnitus",
+        "Tinnitus",
+        0.14,
+        us=0.15,
+        has_phrase="tinnitus",
+    ),
+    Trait(
+        "shellfish",
+        "Health",
+        "Shellfish allergy",
+        "Shellfish allergy",
+        0.02,
+        us=0.03,
+        has_phrase="a shellfish allergy",
     ),
 )
 

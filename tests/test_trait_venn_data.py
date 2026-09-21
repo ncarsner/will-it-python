@@ -174,3 +174,17 @@ def test_age_brackets_are_exclusive_and_named_consistently():
     ages = [t for t in TRAITS if t.category == "Age"]
     assert {t.group for t in ages} == {"age"}
     assert all(t.name.startswith("Age ") for t in ages)
+
+
+def test_everyday_is_a_drill_down_category():
+    everyday = next(c for c in CATEGORIES if c.name == "Everyday")
+    assert everyday.side is Side.UNCONVENTIONAL
+
+
+def test_handedness_chips_are_short():
+    shorts = sorted(t.short for t in TRAITS if t.group == "hand")
+    assert shorts == ["Ambidextrous", "Left", "Right"]
+
+
+def test_drivers_license_removed():
+    assert "license" not in TRAITS_BY_ID
