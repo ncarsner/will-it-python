@@ -1,14 +1,14 @@
 // Trait Venn — renders the page state computed by /api/state.
-// All probabilities, odds, percentages, ordering and label placement come
-// from the server; this file only draws them and handles interaction.
+// All probabilities, odds, percentages, ordering, label placement, and text
+// (headline, sources, summary) come from the server; this file only draws
+// them and handles interaction.
 "use strict";
 
-const SVG_NS = "http://www.w3.org/2000/svg";
-const DEFAULT_SELECTION = ["female", "left", "green"];
 const DEFAULT_OPEN = "Senses & mind";
 
 const ui = {
-  selection: [],
+  selection: null, // null: let the server apply its default selection
+
   country: "US",
   open: DEFAULT_OPEN,
   textView: false,
@@ -47,17 +47,22 @@ const nationPop = () => popNow(ui.data.population.nation);
 // ---------------------------------------------------------------------------
 // Data loading
 // ---------------------------------------------------------------------------
-async function load(toggle) {
-  const params = new URLSearchParams({ sel: ui.selection.join(","), country: ui.country });
+// `push`: record the change as a new history entry. Browser reader views
+// re-read the page on navigation but not on replaceState, so user changes
+// are pushed (which also makes Back undo a selection); the initial load and
+// Back/Forward restores replace.
+async function load(toggle, { push = false } = {}) {
+  const params = new URLSearchParams({ country: ui.country });
+  if (ui.selection !== null) params.set("sel", ui.selection.join(","));
   if (toggle) params.set("toggle", toggle);
   const response = await fetch(`/api/state?${params}`);
   const body = await response.json();
   if (!response.ok) {
-    if (!ui.data) {
+    if (!ui.data && (ui.selection !== null || ui.country !== "US")) {
       // A stale or hand-edited link (e.g. a renamed trait id): start fresh.
-      ui.selection = DEFAULT_SELECTION;
+      ui.selection = null;
       ui.country = "US";
-      if (toggle !== undefined || params.get("sel") !== DEFAULT_SELECTION.join(",")) return load();
+      return load(undefined, { push });
     }
     $("hero").textContent = `Error: ${body.error}`;
     return;
@@ -66,12 +71,25 @@ async function load(toggle) {
   ui.selection = body.selection;
   ui.country = body.country;
   ui.hover = 0;
+  updateUrl(push);
+  render();
+}
+
+function updateUrl(push) {
   const url = new URL(location.href);
   url.searchParams.set("sel", ui.selection.join(","));
   url.searchParams.set("country", ui.country);
   if (ui.textView) url.searchParams.set("view", "text"); else url.searchParams.delete("view");
-  history.replaceState(null, "", url);
-  render();
+  if (url.href === location.href) return;
+  if (push) history.pushState(null, "", url); else history.replaceState(null, "", url);
+}
+
+// Read selection, nation, and view from the URL (initial load, Back/Forward).
+function readUrl() {
+  const params = new URLSearchParams(location.search);
+  ui.selection = params.has("sel") ? params.get("sel").split(",").filter(Boolean) : null;
+  ui.country = params.get("country") || "US";
+  ui.textView = params.get("view") === "text";
 }
 
 // ---------------------------------------------------------------------------
@@ -85,7 +103,7 @@ function render() {
   const refocus = focused && (focused.dataset.trait ? `[data-trait="${focused.dataset.trait}"]`
     : focused.dataset.category ? `[data-category="${focused.dataset.category}"]` : null);
 
-  $("hero").innerHTML = headline(d, true);
+  $("hero").innerHTML = d.headline.html;
 
   $("world-count").innerHTML = any ? `<span class="big" id="world-live"></span><span class="muted">on Earth</span>` : "";
   $("nation-count").textContent = "";
@@ -103,20 +121,11 @@ function render() {
 
   renderDiagram();
   renderInspector();
-  renderSources();
-  renderSummary();
+  $("sources").textContent = d.sourcesText;
+  $("summary-body").innerHTML = d.summaryHtml;
+  document.title = d.title;
   tick();
   if (refocus) document.querySelector(refocus)?.focus();
-}
-
-// Headline sentence as HTML (emphasized) or plain text (title, summary).
-function headline(d, html) {
-  if (!d.selection.length) return "Pick traits on either side to see how rare that person is.";
-  const strong = (t) => (html ? `<strong>${esc(t)}</strong>` : t);
-  const odds = html ? `<span class="odds">${esc(d.headline.odds)}</span>` : d.headline.odds;
-  const who = [d.headline.is && `is ${strong(d.headline.is)}`, d.headline.has && `has ${strong(d.headline.has)}`]
-    .filter(Boolean).join(", and ");
-  return `Someone who ${who} is ${odds} worldwide.`;
 }
 
 function renderNations() {
@@ -142,41 +151,6 @@ function accordionHtml(c, i) {
     <h3 class="label"><button type="button" class="acc" data-category="${esc(c.name)}" aria-expanded="${open}" aria-controls="acc-${i}">
       <span>${esc(c.name)}${badge}</span><span class="caret" aria-hidden="true">▸</span></button></h3>
     <div class="chips" id="acc-${i}"${open ? "" : " hidden"}>${c.traits.map(chipHtml).join("")}</div></div>`;
-}
-
-function renderSources() {
-  const d = ui.data;
-  const pops = d.country === "US"
-    ? `US & world population: ${d.population.source}`
-    : `${d.countryName} population: ${d.population.source} · world: ${d.population.worldSource}`;
-  $("sources").textContent =
-    `Hover the diagram, or focus it and use ← → to explore regions · diagram & chips use ${d.countryName} shares, headline is worldwide · ${pops}`;
-}
-
-// ---------------------------------------------------------------------------
-// Reader-view summary and document title
-// ---------------------------------------------------------------------------
-function renderSummary() {
-  const d = ui.data, box = $("summary-body");
-  const heroText = headline(d, false);
-  document.title = d.selection.length ? `${heroText} | Trait Venn` : "Trait Venn";
-  if (!d.selection.length) {
-    box.innerHTML = `<p>${esc(heroText)}</p>`;
-    return;
-  }
-  const chips = d.categories.flatMap((c) => c.traits).filter((t) => t.slot !== null).sort((a, b) => a.slot - b.slot);
-  const traits = chips.map((t) => `<li>${esc(t.name)}${t.pct ? `: ${esc(t.pct)} in ${esc(d.countryName)}` : ""}</li>`).join("");
-  const rows = [...d.regions]
-    .sort((a, b) => b.slots.length - a.slots.length || a.mask - b.mask)
-    .map((r) => `<tr><th scope="row">${r.names.map(esc).join(" + ")}</th><td>${esc(r.nation.pct || "—")}</td>` +
-                `<td>${esc(r.nation.odds)}</td><td>${esc(r.nation.count)}</td></tr>`).join("");
-  box.innerHTML = `<p>${esc(heroText)}</p>
-    <p>In ${esc(d.countryName)}: ${esc(d.nation.odds)}, ${esc(d.nation.count)}. On Earth: ${esc(d.world.count)} of ${d.world.population.toLocaleString("en-US")}.</p>
-    <h3>Selected traits</h3><ul>${traits}</ul>
-    <h3>Every intersection in ${esc(d.countryName)}</h3>
-    <table><thead><tr><th scope="col">Traits</th><th scope="col">Share</th><th scope="col">Odds</th><th scope="col">Expected people</th></tr></thead>
-    <tbody>${rows}</tbody></table>
-    <p>${esc($("sources").textContent)}. Traits assumed independent except where they depend on gender.</p>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -300,30 +274,26 @@ function tick() {
 // ---------------------------------------------------------------------------
 document.addEventListener("click", (ev) => {
   const chip = ev.target.closest("[data-trait]");
-  if (chip && !chip.disabled) { load(chip.dataset.trait); return; }
+  if (chip && !chip.disabled) { load(chip.dataset.trait, { push: true }); return; }
   const acc = ev.target.closest("[data-category]");
   if (acc) {
     ui.open = ui.open === acc.dataset.category ? null : acc.dataset.category;
     render();
   }
 });
-$("clear").addEventListener("click", () => { ui.selection = []; load(); });
+$("clear").addEventListener("click", () => { ui.selection = []; load(undefined, { push: true }); });
 // In-app text view: the same summary shown in place of the diagram. Unlike a
 // browser reader view (a one-time snapshot), it updates with every change.
 $("text-view").addEventListener("click", () => {
   ui.textView = !ui.textView;
-  const url = new URL(location.href);
-  if (ui.textView) url.searchParams.set("view", "text"); else url.searchParams.delete("view");
-  history.replaceState(null, "", url);
+  updateUrl(true);
   render();
 });
 // Re-draw the SVG with the new concrete colors when the OS theme changes.
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (ui.data) renderDiagram(); });
-$("nation").addEventListener("change", (ev) => { ui.country = ev.target.value; load(); });
+$("nation").addEventListener("change", (ev) => { ui.country = ev.target.value; load(undefined, { push: true }); });
+addEventListener("popstate", () => { readUrl(); load(); });
 setInterval(tick, 1000);
 
-const params = new URLSearchParams(location.search);
-ui.selection = params.has("sel") ? params.get("sel").split(",").filter(Boolean) : DEFAULT_SELECTION;
-ui.country = params.get("country") || "US";
-ui.textView = params.get("view") === "text";
+readUrl();
 load();
