@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from will_it_python.trait_venn import calc, geometry
+from will_it_python.trait_venn import calc, geometry, summary
 from will_it_python.trait_venn.population import Clock, Snapshot
 from will_it_python.trait_venn.traits import (
     CATEGORIES,
@@ -160,7 +160,12 @@ def build_state(request: Request, snap: Snapshot, now: float) -> Json:
     full = (1 << len(traits)) - 1
     world_p = calc.region_probability(traits, full, None).inclusive
     nation_p = calc.region_probability(traits, full, country).inclusive
-    return {
+    is_text = calc.join_phrases([t.is_phrase for t in traits if t.is_phrase])
+    has_text = calc.join_phrases([t.has_phrase for t in traits if t.has_phrase])
+    odds = calc.ratio(world_p)
+    text = summary.headline(is_text, has_text, odds, html=False)
+    source = snap.source if country == US else "static 2026 estimate"
+    state: Json = {
         "selection": list(selection),
         "country": country,
         "countryName": nation.name,
@@ -168,18 +173,24 @@ def build_state(request: Request, snap: Snapshot, now: float) -> Json:
         "countries": ordered_countries(),
         "categories": _categories(selection, country),
         "headline": {
-            "is": calc.join_phrases([t.is_phrase for t in traits if t.is_phrase]),
-            "has": calc.join_phrases([t.has_phrase for t in traits if t.has_phrase]),
-            "odds": calc.ratio(world_p),
+            "is": is_text,
+            "has": has_text,
+            "odds": odds,
+            "text": text,
+            "html": summary.headline(is_text, has_text, odds, html=True),
         },
+        "title": f"{text} | Trait Venn" if traits else "Trait Venn",
+        "sourcesText": summary.sources(country, nation.name, source, snap.source),
         "world": _scope(world_pop, world_p),
         "nation": _scope(nation_pop, nation_p),
         "population": {
             "world": _clock(snap.world),
             "nation": _clock(nation_clock),
-            "source": snap.source if country == US else "static 2026 estimate",
+            "source": source,
             "worldSource": snap.source,
         },
         "diagram": _diagram(traits, country),
         "regions": _regions(traits, country, world_pop, nation_pop),
     }
+    state["summaryHtml"] = summary.summary_html(state)
+    return state

@@ -4,7 +4,7 @@ import pytest
 
 from will_it_python.trait_venn import calc, population, state
 from will_it_python.trait_venn.population import Clock, Snapshot
-from will_it_python.trait_venn.traits import TRAITS_BY_ID
+from will_it_python.trait_venn.traits import DEFAULT_SELECTION, TRAITS_BY_ID
 from will_it_python.trait_venn.validation import (
     Request,
     RequestError,
@@ -48,7 +48,13 @@ def test_toggle_appends_until_limit():
 
 
 def test_parse_query_defaults():
-    assert parse_query({}) == Request((), "US")
+    assert parse_query({}) == Request(DEFAULT_SELECTION, "US")
+
+
+def test_parse_query_blank_selection_means_nothing_selected():
+    assert parse_query({"sel": [""], "country": [""], "toggle": [""]}) == Request(
+        (), "US"
+    )
 
 
 def test_parse_query_valid_with_whitespace_and_toggle():
@@ -162,11 +168,17 @@ def test_countries_us_first_then_alphabetical():
 
 def test_state_headline_and_scopes():
     s = build(["female", "left", "green"])
-    assert s["headline"] == {
-        "is": "female, left-handed and green-eyed",
-        "has": "",
-        "odds": calc.ratio(0.496 * 0.10 * 0.02),
-    }
+    odds = calc.ratio(0.496 * 0.10 * 0.02)
+    headline = s["headline"]
+    assert (headline["is"], headline["has"], headline["odds"]) == (
+        "female, left-handed and green-eyed",
+        "",
+        odds,
+    )
+    assert headline["text"] == (
+        f"Someone who is female, left-handed and green-eyed is {odds} worldwide."
+    )
+    assert s["title"] == headline["text"] + " | Trait Venn"
     assert s["world"]["p"] == pytest.approx(0.496 * 0.10 * 0.02)
     assert s["nation"]["p"] == pytest.approx(0.505 * 0.10 * 0.09)
     assert s["countryName"] == "United States"

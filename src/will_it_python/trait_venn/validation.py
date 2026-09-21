@@ -12,6 +12,7 @@ from dataclasses import dataclass
 
 from will_it_python.trait_venn.traits import (
     COUNTRIES_BY_CODE,
+    DEFAULT_SELECTION,
     MAX_SELECTED,
     TRAITS_BY_ID,
     US,
@@ -100,11 +101,13 @@ def _validate_selection(ids: list[str]) -> tuple[str, ...]:
 def parse_query(query: Mapping[str, Sequence[str]]) -> Request:
     """Validate a parsed query string and apply an optional toggle.
 
-    Recognized keys: ``sel`` (comma-separated trait ids), ``country``
+    Recognized keys: ``sel`` (comma-separated trait ids; absent means
+    :data:`DEFAULT_SELECTION`, empty means nothing selected), ``country``
     (country code, default ``US``), and ``toggle`` (a trait id to toggle).
 
     Args:
-        query: Output of :func:`urllib.parse.parse_qs`.
+        query: Output of :func:`urllib.parse.parse_qs` with
+            ``keep_blank_values=True``.
 
     Returns:
         The validated request, with the toggle already applied.
@@ -112,8 +115,13 @@ def parse_query(query: Mapping[str, Sequence[str]]) -> Request:
     Raises:
         RequestError: If any parameter is invalid.
     """
-    raw = _single(query, "sel")
-    selection = _validate_selection([s.strip() for s in raw.split(",") if s.strip()])
+    if "sel" in query:
+        raw = _single(query, "sel")
+        selection = _validate_selection(
+            [s.strip() for s in raw.split(",") if s.strip()]
+        )
+    else:
+        selection = DEFAULT_SELECTION
     country = _single(query, "country") or US
     if country not in COUNTRIES_BY_CODE:
         raise RequestError(f"unknown country code: {country}")

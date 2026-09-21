@@ -19,6 +19,7 @@ import urllib.error
 import urllib.request
 import webbrowser
 from collections.abc import Sequence
+from html import escape
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib import resources
@@ -26,7 +27,7 @@ from typing import ClassVar, Final
 from urllib.parse import parse_qs, urlsplit
 
 from will_it_python.trait_venn import population
-from will_it_python.trait_venn.state import build_state
+from will_it_python.trait_venn.state import Json, build_state
 from will_it_python.trait_venn.validation import RequestError, parse_query
 
 log = logging.getLogger(__name__)
@@ -39,6 +40,12 @@ _POPULATION_TTL: Final = 600.0
 _USER_AGENT: Final = (
     "will-it-python trait-venn (+https://github.com/ncarsner/will-it-python)"
 )
+
+# Placeholders in index.html filled with the requested selection's text, so
+# the initial HTML is complete for reader views and clients without scripts.
+_TITLE_SLOT: Final = "<title>Trait Venn</title>"
+_HERO_SLOT: Final = '<h1 class="hero" id="hero" aria-live="polite"></h1>'
+_SUMMARY_SLOT: Final = '<div id="summary-body"></div>'
 
 _ASSETS: Final[dict[str, str]] = {
     "index.html": "text/html; charset=utf-8",
@@ -68,6 +75,34 @@ def fetch_json(url: str) -> object | None:
     except (urllib.error.URLError, TimeoutError, ValueError) as exc:
         log.warning("population fetch failed for %s: %s", url, exc)
         return None
+
+
+def render_page(state: Json | None) -> bytes:
+    """Return index.html with the headline, title, and summary filled in.
+
+    Args:
+        state: Page state for the requested selection, or ``None`` to serve
+            the page unfilled (the script then loads the state itself).
+
+    Returns:
+        The page bytes.
+    """
+    page = read_asset("index.html").decode()
+    if state is not None:
+        page = (
+            page.replace(_TITLE_SLOT, f"<title>{escape(state['title'])}</title>", 1)
+            .replace(
+                _HERO_SLOT,
+                _HERO_SLOT.replace("></h1>", f">{state['headline']['html']}</h1>"),
+                1,
+            )
+            .replace(
+                _SUMMARY_SLOT,
+                _SUMMARY_SLOT.replace("></div>", f">{state['summaryHtml']}</div>"),
+                1,
+            )
+        )
+    return page.encode()
 
 
 class PopulationCache:
@@ -100,7 +135,7 @@ class Handler(BaseHTTPRequestHandler):
         """Route a GET request."""
         url = urlsplit(self.path)
         if url.path == "/":
-            self._send(HTTPStatus.OK, _ASSETS["index.html"], read_asset("index.html"))
+            self._send(HTTPStatus.OK, _ASSETS["index.html"], self._page(url.query))
         elif url.path.startswith("/static/") and (name := url.path[8:]) in _ASSETS:
             self._send(HTTPStatus.OK, _ASSETS[name], read_asset(name))
         elif url.path == "/api/state":
@@ -108,9 +143,17 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self._json(HTTPStatus.NOT_FOUND, {"error": "not found"})
 
+    def _page(self, query: str) -> bytes:
+        try:
+            request = parse_query(parse_qs(query, keep_blank_values=True))
+        except RequestError:
+            return render_page(None)
+        now = time.time()
+        return render_page(build_state(request, self.cache.get(now), now))
+
     def _state(self, query: str) -> None:
         try:
-            request = parse_query(parse_qs(query))
+            request = parse_query(parse_qs(query, keep_blank_values=True))
         except RequestError as exc:
             self._json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
             return

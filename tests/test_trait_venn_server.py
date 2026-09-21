@@ -45,6 +45,7 @@ def test_index_page(base_url):
     assert status == 200
     assert ctype.startswith("text/html")
     assert b"Traits assumed independent except where they depend on gender" in body
+    assert b"<title>Someone who is female" in body
 
 
 @pytest.mark.parametrize(
@@ -224,3 +225,28 @@ def test_text_view_toggle_and_summary_in_stage():
     assert 'id="text-view" aria-pressed="false"' in page
     stage = page.split('<section class="stage"', 1)[1].split("</main>", 1)[0]
     assert 'id="summary-body"' in stage
+
+
+def test_page_embeds_summary_for_requested_selection(base_url):
+    _, _, body = get(base_url + "/?sel=male,left&country=JP")
+    page = body.decode()
+    assert "<title>Someone who is male and left-handed is 1 in 19 worldwide." in page
+    assert '<span class="odds">1 in 19</span>' in page
+    assert "<li>Male: 50.4% in Japan</li>" in page
+
+
+def test_page_without_selection_uses_default(base_url):
+    _, _, body = get(base_url + "/")
+    assert b"is <strong>female, left-handed and green-eyed</strong>" in body
+
+
+def test_page_with_invalid_query_is_served_unfilled(base_url):
+    status, _, body = get(base_url + "/?sel=nope")
+    assert status == 200
+    assert b"<title>Trait Venn</title>" in body
+    assert b'<div id="summary-body"></div>' in body
+
+
+def test_api_state_blank_selection_is_empty(base_url):
+    _, _, body = get(base_url + "/api/state?sel=&country=US")
+    assert json.loads(body)["selection"] == []

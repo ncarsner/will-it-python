@@ -28,9 +28,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Text view: a live text summary (headline, counts, selected traits, table
   of every intersection) that replaces the diagram on demand
 - Reader-view support: the summary stays available to browser reader views
-  and screen readers when hidden, the SVG uses concrete colors, the document
-  title follows the result, and print styles show the summary
-- 331 tests with 100% branch coverage for the `trait_venn` package
+  and screen readers when hidden, is server-rendered into the initial HTML
+  for the URL's selection, and selection changes are pushed to browser
+  history so reader views re-read the page; the SVG uses concrete colors,
+  the document title follows the result, and print styles show the summary
+- 344 tests with 100% branch coverage for the `trait_venn` package
 
 ---
 

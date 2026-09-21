@@ -14,6 +14,8 @@ from typing import Final
 
 US: Final = "US"
 MAX_SELECTED: Final = 5
+# Shown when a request or link carries no selection at all.
+DEFAULT_SELECTION: Final = ("female", "left", "green")
 
 
 class Side(StrEnum):
