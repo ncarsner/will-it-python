@@ -44,6 +44,12 @@ async function load(toggle) {
   const response = await fetch(`/api/state?${params}`);
   const body = await response.json();
   if (!response.ok) {
+    if (!ui.data) {
+      // A stale or hand-edited link (e.g. a renamed trait id): start fresh.
+      ui.selection = DEFAULT_SELECTION;
+      ui.country = "US";
+      if (toggle !== undefined || params.get("sel") !== DEFAULT_SELECTION.join(",")) return load();
+    }
     $("hero").textContent = `Error: ${body.error}`;
     return;
   }
