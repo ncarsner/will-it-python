@@ -32,7 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   for the URL's selection, and selection changes are pushed to browser
   history so reader views re-read the page; the SVG uses concrete colors,
   the document title follows the result, and print styles show the summary
-- 344 tests with 100% branch coverage for the `trait_venn` package
+- 345 tests with 100% branch coverage for the `trait_venn` package
 
 ---
 

@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
-<article class="page">
+<div class="page">
   <header class="band">
     <h1 class="hero" id="hero" aria-live="polite"></h1>
     <div class="pair">
@@ -35,12 +35,13 @@
       <div class="venn" id="venn"></div>
       <aside class="inspector" id="inspector" aria-live="polite"></aside>
       <!-- Text version of the result: shown by "Text view"; otherwise visually
-           hidden with clipping (not display:none) so browser reader views and
-           screen readers keep it. -->
-      <section class="reader-summary" id="summary" aria-labelledby="summary-h">
+           hidden with clipping (not display:none) so screen readers keep it.
+           It is the page's only article element, so browser reader views choose it
+           as the main content and leave out the interactive controls. -->
+      <article class="reader-summary" id="summary" aria-labelledby="summary-h">
         <h2 id="summary-h">Summary</h2>
         <div id="summary-body"></div>
-      </section>
+      </article>
     </section>
 
     <section class="col" aria-labelledby="unconventional-h">
@@ -54,7 +55,7 @@
     <p id="sources"></p>
     <p>Traits assumed independent except where they depend on gender (color blindness, height, migraines).</p>
   </footer>
-</article>
+</div>
 <script src="/static/app.js"></script>
 </body>
 </html>

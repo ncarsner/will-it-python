@@ -105,9 +105,10 @@ function render() {
 
   $("hero").innerHTML = d.headline.html;
 
-  $("world-count").innerHTML = any ? `<span class="big" id="world-live"></span><span class="muted">on Earth</span>` : "";
+  // Real spaces between spans: reader views and copy/paste drop the CSS margins.
+  $("world-count").innerHTML = any ? `<span class="big" id="world-live"></span> <span class="muted">on Earth</span>` : "";
   $("nation-count").textContent = "";
-  $("nation-odds").textContent = any ? `· ${d.nation.odds}` : "";
+  $("nation-odds").textContent = any ? ` · ${d.nation.odds}` : "";
   renderNations();
   $("selected-count").textContent = `${d.selection.length}/${d.max} traits`;
   $("clear").hidden = !any;
