@@ -13,11 +13,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `trait_venn` web app: select 1–5 traits and see a Venn diagram of their
   prevalence, every intersection, "1 in N" odds, and expected head counts for
   the world and a selected nation of origin
-- 86 traits in 14 categories, split into conventional (always visible:
+- 100 traits in 14 categories, split into conventional (always visible:
   gender, age, handedness, eye color, hair color, blood type, where you
-  live, everyday) and less conventional (drill-down: senses & mind, health,
+  live) and less conventional (drill-down: everyday, senses & mind, health,
   genetic quirks, birth, lifestyle, rare experiences); one choice per
-  exclusive group
+  exclusive group; age brackets ordered youngest to oldest
 - Gender-conditional probability model for color blindness, height, and
   migraines
 - Tuned 4- and 5-set ellipse layouts that keep the all-traits center small

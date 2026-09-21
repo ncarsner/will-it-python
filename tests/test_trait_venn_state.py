@@ -239,3 +239,19 @@ def test_state_empty_selection():
     assert s["regions"] == []
     assert s["population"]["source"] == "static 2026 estimate"
     assert s["nation"]["population"] == 123_000_000
+
+
+def test_state_age_brackets_youngest_to_oldest():
+    age = next(c for c in build([])["categories"] if c["name"] == "Age")
+    assert [t["id"] for t in age["traits"]] == [
+        "age_under18",
+        "age_18_34",
+        "age_35_54",
+        "age_55_64",
+        "age_65plus",
+    ]
+
+
+def test_state_other_categories_still_sorted_by_prevalence():
+    hand = next(c for c in build([])["categories"] if c["name"] == "Handedness")
+    assert [t["short"] for t in hand["traits"]] == ["Right", "Left", "Ambidextrous"]
