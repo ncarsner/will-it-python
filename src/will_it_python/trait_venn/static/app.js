@@ -109,6 +109,7 @@ function render() {
   $("world-count").innerHTML = any ? `<span class="big" id="world-live"></span> <span class="muted">on Earth</span>` : "";
   $("nation-count").textContent = "";
   $("nation-odds").textContent = any ? ` · ${d.nation.odds}` : "";
+  $("nation-name").textContent = d.countryName;
   renderNations();
   $("selected-count").textContent = `${d.selection.length}/${d.max} traits`;
   $("clear").hidden = !any;
@@ -292,7 +293,25 @@ $("text-view").addEventListener("click", () => {
 });
 // Re-draw the SVG with the new concrete colors when the OS theme changes.
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (ui.data) renderDiagram(); });
-$("nation").addEventListener("change", (ev) => { ui.country = ev.target.value; load(undefined, { push: true }); });
+// Nation picker: plain text until opened, so reader views never copy a select.
+function setPicker(open, { refocus = true } = {}) {
+  $("nation-picker").hidden = !open;
+  $("nation-name").hidden = open;
+  $("nation-edit").hidden = open;
+  $("nation-edit").setAttribute("aria-expanded", String(open));
+  if (open) $("nation").focus();
+  else if (refocus) $("nation-edit").focus();
+}
+$("nation-edit").addEventListener("click", () => setPicker(true));
+$("nation-name").addEventListener("click", () => setPicker(true));
+$("nation").addEventListener("change", (ev) => {
+  ui.country = ev.target.value;
+  setPicker(false);
+  load(undefined, { push: true });
+});
+$("nation").addEventListener("keydown", (ev) => { if (ev.key === "Escape") setPicker(false); });
+// Leaving the picker (Tab, click elsewhere) closes it without pulling focus back.
+$("nation").addEventListener("blur", () => { if (!$("nation-picker").hidden) setPicker(false, { refocus: false }); });
 addEventListener("popstate", () => { readUrl(); load(); });
 setInterval(tick, 1000);
 

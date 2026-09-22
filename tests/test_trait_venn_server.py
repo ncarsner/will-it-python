@@ -265,3 +265,14 @@ def test_header_counts_have_real_spaces():
     script = server.read_asset("app.js")
     assert b'</span> <span class="muted">on Earth</span>' in script
     assert b"` \xc2\xb7 ${d.nation.odds}`" in script
+
+
+def test_nation_is_text_and_picker_starts_hidden():
+    # Reader views copy <select> elements but drop buttons; the picker must be
+    # hidden until opened and the nation shown as text.
+    page = server.read_asset("index.html").decode()
+    header = page.split('<header class="band">', 1)[1].split("</header>", 1)[0]
+    assert 'id="nation-name"' in header
+    assert '<span id="nation-picker" hidden>' in header
+    assert header.index("nation-picker") < header.index("<select")
+    assert "·" not in header.split('class="meta"', 1)[1]  # separators are CSS

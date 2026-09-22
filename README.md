@@ -68,7 +68,7 @@ The selection and nation are kept in the page URL (`?sel=female,left,green&count
 
 ### Layout
 
-- **Header** — "Someone who is … is **1 in N** worldwide", expected counts on Earth and in the selected nation, and the nation selector (United States first, then all others alphabetically).
+- **Header** — "Someone who is … is **1 in N** worldwide", expected counts on Earth and in the selected nation, and the nation of origin, shown as text; the ▾ button next to it opens the picker (United States first, then all others alphabetically).
 - **Left column, Conventional** — gender, age, handedness, eye color, hair color, blood type, and where you live; one choice per row.
 - **Center** — the Venn diagram (circles for 1–3 traits, ellipses for 4–5). Hover a region, or focus the diagram and use the arrow keys, to inspect it.
 - **Right column, Less conventional** — everyday, senses & mind, health, genetic quirks, birth, lifestyle, and rare experiences, as drill-down categories (one open at a time).
@@ -80,7 +80,7 @@ Traits in each category are sorted from most to least common for the selected na
 
 **Text view** (header link, or `?view=text` in the URL) replaces the diagram with a text summary of the current result: the headline, counts for the selected nation and the world, the selected traits, and a table of every intersection. It updates immediately as traits or the nation change.
 
-Outside text view, the same summary is visually hidden with clipping rather than `display: none`, so browser reader views (Safari Reader, Firefox Reader View) and screen readers still pick it up, and printing shows it in place of the controls. The server also renders the headline, title, and summary into the HTML for the selection in the URL, so the page is complete before any script runs. Each selection change is recorded as a browser history entry (Back undoes it), which prompts reader views to re-read the page. The summary is the page's only `<article>`, so reader views show it as plain text rather than copying the interactive header; controls do not work inside a reader view, so change the nation or traits on the page itself. The diagram is drawn with concrete colors so it keeps its colors when a reader view copies it.
+Outside text view, the same summary is visually hidden with clipping rather than `display: none`, so browser reader views (Safari Reader, Firefox Reader View) and screen readers still pick it up, and printing shows it in place of the controls. The server also renders the headline, title, and summary into the HTML for the selection in the URL, so the page is complete before any script runs. Each selection change is recorded as a browser history entry (Back undoes it), which prompts reader views to re-read the page. The summary is the page's only `<article>`, and the header shows the nation as text with the picker created only while open, so reader views show text rather than inert controls; change the nation or traits on the page itself. The diagram is drawn with concrete colors so it keeps its colors when a reader view copies it.
 
 ### Calculations
 
