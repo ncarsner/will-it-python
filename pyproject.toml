@@ -20,6 +20,26 @@ personalities = "will_it_python.personalities:main"
 naval_flags = "will_it_python.naval_flags:main"
 trait_venn = "will_it_python.trait_venn.server:main"
 
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+# Page assets served by the trait_venn web app.
+"will_it_python.trait_venn" = ["static/*.html", "static/*.css", "static/*.js"]
+
+[tool.uv]
+# Rebuild local installs (uvx --from ., uv run) when sources change, not only
+# when pyproject.toml does.
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "src/**/*.py" },
+    { file = "src/**/static/*" },
+]
+
 [tool.ruff]
 line-length = 88
 target-version = "py312"

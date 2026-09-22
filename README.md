@@ -64,6 +64,27 @@ uv run trait_venn
 uv run python3 -m will_it_python.trait_venn
 ```
 
+### Running with uvx
+
+`uvx` builds the project into an isolated, cached environment and runs the `trait_venn` script; no virtual environment setup is needed on the local machine, only [uv](https://docs.astral.sh/uv/).
+
+```bash
+# From the root of a local clone
+uvx --from . trait_venn
+
+# From any directory, pointing at a local clone
+uvx --from /path/to/will-it-python trait_venn
+
+# Straight from GitHub, without cloning (use @<branch> or @<tag> to pin a ref)
+uvx --from git+https://github.com/ncarsner/will-it-python trait_venn
+uvx --from git+https://github.com/ncarsner/will-it-python@venn-diagrams trait_venn
+
+# Options pass through as usual
+uvx --from . trait_venn --port 9000 --no-browser
+```
+
+The first run downloads the project's dependencies into uv's cache, so it takes longer than later runs. Local runs (`--from .` or a path) rebuild automatically when any file under `src/` changes, so trait edits show up on the next launch without extra flags.
+
 The selection and nation are kept in the page URL (`?sel=female,left,green&country=US`), so a combination can be bookmarked or shared; without `sel`, the default selection (female, left-handed, green eyes) is shown, and `sel=` means nothing selected.
 
 ### Layout
