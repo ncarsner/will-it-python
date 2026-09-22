@@ -113,6 +113,17 @@ Traits in each category are sorted from most to least common for the selected na
 
 Outside text view, the same summary is visually hidden with clipping rather than `display: none`, so browser reader views (Safari Reader, Firefox Reader View) and screen readers still pick it up, and printing shows it in place of the controls. The server also renders the headline, title, and summary into the HTML for the selection in the URL, so the page is complete before any script runs. Each selection change is recorded as a browser history entry (Back undoes it), which prompts reader views to re-read the page. The summary is the page's only `<article>`, the header shows the nation as text with the picker created only while open, and the column headings are CSS-generated text, so reader views show the result rather than inert controls or picker labels; change the nation or traits on the page itself. The diagram is drawn with concrete colors so it keeps its colors when a reader view copies it.
 
+### Accessibility
+
+Scanned with `@axe-core/cli` (headless Firefox, tags `wcag2a,wcag2aa,wcag21a,wcag21aa`) in five states — default, five traits, text view, empty selection, and a non-US nation — with zero violations (#11).
+
+```bash
+npx @axe-core/cli --browser firefox --load-delay 1500 \
+  --tags wcag2a,wcag2aa,wcag21a,wcag21aa http://127.0.0.1:8765/
+```
+
+axe cannot compute contrast for the diagram's labels, because translucent ellipses overlap them; those ratios were checked by hand. In the light theme the worst case is 4.88:1 for a label over its own fill and 6.70:1 for white chip text on the solid color; the dark theme is 5.42:1 or better.
+
 ### Calculations
 
 - Traits are treated as independent conditional on gender (female/male): P = Σ_g P(g) · Π P(trait | g). Color blindness, height over 6 ft, and migraines carry gender-specific prevalence.

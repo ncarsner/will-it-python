@@ -116,6 +116,8 @@ function render() {
   $("text-view").setAttribute("aria-pressed", String(ui.textView));
   $("text-view").textContent = ui.textView ? "Diagram view" : "Text view";
   document.querySelector(".page").classList.toggle("text-view", ui.textView);
+  // In text view the summary scrolls, so it needs to be keyboard reachable.
+  $("summary").tabIndex = ui.textView ? 0 : -1;
   $("conventional-note").dataset.text = `One per row · % shown for ${d.countryName}`;
 
   $("conventional").innerHTML = d.categories.filter((c) => c.side === "conventional").map(groupHtml).join("");
