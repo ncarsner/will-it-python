@@ -110,6 +110,58 @@ Outside text view, the same summary is visually hidden with clipping rather than
 - Percentages are omitted for combinations rarer than 1 in 1,000,000.
 - Expected counts are ⌊population × p⌋; below one person the app shows "statistically nobody" with the expected value.
 
+### Updating traits
+
+All trait, category, and country data lives in [`src/will_it_python/trait_venn/traits.py`](src/will_it_python/trait_venn/traits.py). Ordering, percentages, odds, the diagram, and the summary are derived from it; no other file needs to change.
+
+**Add or edit a trait** by adding a `Trait(...)` entry to the `TRAITS` tuple:
+
+```python
+Trait(
+    "widowpeak",             # id: stable, ASCII, no spaces; used in URLs (?sel=widowpeak)
+    "Genetic quirks",        # category: must match a name in CATEGORIES
+    "Widow's peak",          # name: shown in the diagram, inspector, and summary
+    "Widow's peak",          # short: chip label in the picker
+    0.30,                    # p: worldwide prevalence, 0 < p < 1
+    us=0.28,                 # optional United States override
+    has_phrase="a widow's peak",  # headline: "Someone who has a widow's peak ..."
+),
+```
+
+| Field | Required | Meaning |
+|-------|----------|---------|
+| `id`, `category`, `name`, `short`, `p` | yes | Positional, in that order |
+| `us` | no | United States prevalence, used when the nation is the US |
+| `group` | no | Exclusive-group key; at most one trait per group can be selected (e.g. `"eyes"`) |
+| `by_gender`, `by_gender_us` | no | Gender-dependent prevalence: `_by_gender(female=0.005, male=0.08)` |
+| `is_phrase` / `has_phrase` | exactly one | Headline wording: "is *phrase*" or "has *phrase*" |
+| `gender` | — | Only on the Female and Male options |
+
+For extremely rare traits, express `p` as a count of living people over the world population, as the existing entries do (for example `_EVEREST_SUMMITERS / _WORLD_2026`). Percentages below 1 in 1,000,000 are not displayed; odds still are.
+
+**Rules checked by the test suite:**
+
+- Ids are unique, ASCII, and contain no spaces.
+- Every trait's category exists, and every category has at least one trait.
+- All prevalence values are strictly between 0 and 1.
+- Each trait has exactly one of `is_phrase` and `has_phrase`.
+- The worldwide values of each exclusive group sum to 1 (± 0.02).
+- Every `by_gender` table defines both female and male.
+
+Renaming an id breaks saved links that use it; those pages fall back to the default selection.
+
+**Add a category** to `CATEGORIES`: `Category("Name", Side.CONVENTIONAL)` places it in the left column (always expanded; intended for one-choice groups), `Side.UNCONVENTIONAL` in the right column as a drill-down. Categories appear in tuple order. Traits within a category are sorted by prevalence for the selected nation; pass `by_prevalence=False` to keep their tuple order instead (as Age does, youngest to oldest).
+
+**Add a nation** to `COUNTRIES`: `Country("CODE", "Name", population)`, using the ISO 3166-1 alpha-2 code and a population estimate. The United States stays first in the picker and the rest are listed alphabetically; US figures come from the Census clock at runtime.
+
+**After editing**, run the checks and restart the app:
+
+```bash
+uv run pytest tests/test_trait_venn_*.py
+uv run ruff check src/will_it_python/trait_venn
+uv run trait_venn          # or: uvx --from . trait_venn
+```
+
 ### Data sources
 
 - **Population** — world and United States figures come from the [U.S. Census Bureau Population Clock](https://www.census.gov/popclock/) (base value, per-second growth rate, and update time), refreshed at most every 10 minutes and projected forward each second. If the clock is unreachable, an approximate projection is used and labeled as such. Other nations use static 2026 estimates.

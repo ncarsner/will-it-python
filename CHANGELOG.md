@@ -23,6 +23,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Tuned 4- and 5-set ellipse layouts that keep the all-traits center small
 - World and US population from the Census Population Clock with a labeled
   fallback projection; static 2026 estimates for other nations
+- Runnable with `uvx --from . trait_venn` (or from the GitHub URL): the
+  project now declares a setuptools build system, ships the page assets as
+  package data, and rebuilds local installs when sources change
+- README instructions for updating traits, categories, and nations
 - Keyboard exploration of diagram regions and WCAG-oriented focus, contrast,
   and ARIA state handling
 - Text view: a live text summary (headline, counts, selected traits, table
