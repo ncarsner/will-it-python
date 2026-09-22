@@ -276,3 +276,14 @@ def test_nation_is_text_and_picker_starts_hidden():
     assert '<span id="nation-picker" hidden>' in header
     assert header.index("nation-picker") < header.index("<select")
     assert "·" not in header.split('class="meta"', 1)[1]  # separators are CSS
+
+
+def test_column_headings_are_generated_text():
+    # Reader views skip CSS-generated content; the column headings and notes
+    # carry their text in data-text so reader views leave them out.
+    page = server.read_asset("index.html").decode()
+    for heading in ("Conventional", "Less conventional"):
+        assert f'class="gen" data-text="{heading}" aria-label="{heading}"></h2>' in page
+    assert '<p class="note gen" id="conventional-note" data-text=""></p>' in page
+    assert b".gen::before { content: attr(data-text); }" in server.read_asset("app.css")
+    assert b'$("conventional-note").dataset.text' in server.read_asset("app.js")

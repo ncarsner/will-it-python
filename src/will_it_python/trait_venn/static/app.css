@@ -50,6 +50,8 @@ p { margin: 0; }
 .col { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; overflow: auto; min-height: 0; }
 .col h2 { font-size: 13px; margin: 0 0 2px; letter-spacing: .02em; }
 .note { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+/* Generated text: visible and announced, but skipped by reader views. */
+.gen::before { content: attr(data-text); }
 .grp { padding: 6px 0; border-top: 1px solid var(--line); }
 .label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; margin: 0 0 4px; }
 .chips { display: flex; flex-wrap: wrap; gap: 4px; }

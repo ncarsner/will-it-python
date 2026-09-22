@@ -30,9 +30,12 @@
   </header>
 
   <main class="grid">
+    <!-- Column headings and notes are CSS-generated (data-text) so browser
+         reader views, which skip generated content, leave them out; aria-label
+         keeps the heading names for assistive technology. -->
     <section class="col" aria-labelledby="conventional-h">
-      <h2 id="conventional-h">Conventional</h2>
-      <p class="note" id="conventional-note"></p>
+      <h2 id="conventional-h" class="gen" data-text="Conventional" aria-label="Conventional"></h2>
+      <p class="note gen" id="conventional-note" data-text=""></p>
       <div id="conventional"></div>
     </section>
 
@@ -50,8 +53,8 @@
     </section>
 
     <section class="col" aria-labelledby="unconventional-h">
-      <h2 id="unconventional-h">Less conventional</h2>
-      <p class="note">Open a category to drill down</p>
+      <h2 id="unconventional-h" class="gen" data-text="Less conventional" aria-label="Less conventional"></h2>
+      <p class="note gen" data-text="Open a category to drill down"></p>
       <div id="unconventional"></div>
     </section>
   </main>

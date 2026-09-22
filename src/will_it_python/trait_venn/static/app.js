@@ -116,7 +116,7 @@ function render() {
   $("text-view").setAttribute("aria-pressed", String(ui.textView));
   $("text-view").textContent = ui.textView ? "Diagram view" : "Text view";
   document.querySelector(".page").classList.toggle("text-view", ui.textView);
-  $("conventional-note").textContent = `One per row · % shown for ${d.countryName}`;
+  $("conventional-note").dataset.text = `One per row · % shown for ${d.countryName}`;
 
   $("conventional").innerHTML = d.categories.filter((c) => c.side === "conventional").map(groupHtml).join("");
   $("unconventional").innerHTML = d.categories.filter((c) => c.side === "unconventional").map(accordionHtml).join("");
