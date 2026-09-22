@@ -13,15 +13,20 @@
     <h1 class="hero" id="hero" aria-live="polite"></h1>
     <div class="pair">
       <p id="world-count"></p>
+      <!-- The nation reads as plain text; the picker exists only while open, so
+           reader views (which copy selects but drop buttons) show text only. -->
       <p>
         <span class="big" id="nation-count"></span>
-        <label for="nation" class="muted">in</label>
-        <select id="nation"></select>
+        <span class="muted">in</span>
+        <span class="nation-name" id="nation-name"></span><button type="button" class="nation-edit" id="nation-edit"
+          aria-expanded="false" aria-controls="nation-picker" aria-label="Change nation of origin">▾</button>
+        <span id="nation-picker" hidden><label for="nation" class="sr-only">Nation of origin</label><select id="nation"></select></span>
         <span class="muted" id="nation-odds"></span>
       </p>
     </div>
-    <p class="meta"><span id="selected-count"></span> <button type="button" class="linkbtn" id="clear">Clear all</button>
-      · <button type="button" class="linkbtn" id="text-view" aria-pressed="false">Text view</button></p>
+    <p class="meta"><span id="selected-count"></span>
+      <button type="button" class="linkbtn sep" id="clear">Clear all</button>
+      <button type="button" class="linkbtn sep" id="text-view" aria-pressed="false">Text view</button></p>
   </header>
 
   <main class="grid">
