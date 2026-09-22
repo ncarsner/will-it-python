@@ -1,0 +1,115 @@
+/* Trait Venn — one-screen "Headline" layout: headline band, then
+   conventional traits | diagram + inspector | less conventional traits. */
+
+:root {
+  --bg: #f7f7f5; --fg: #1d1d1f; --muted: #5f5f66; --card: #fff; --line: #e2e2de; --accent: #2f4fc4;
+  /* Slot colors: strokes, labels, and chip backgrounds (white text, >= 4.5:1). */
+  --c0: #c2410c; --c1: #1d4ed8; --c2: #15803d; --c3: #7e22ce; --c4: #a16207; --on-c: #fff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141416; --fg: #ececef; --muted: #a3a3ab; --card: #1e1e22; --line: #34343a; --accent: #8aa2ff;
+    --c0: #fb923c; --c1: #60a5fa; --c2: #4ade80; --c3: #c084fc; --c4: #fbbf24; --on-c: #111;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141416; --fg: #ececef; --muted: #a3a3ab; --card: #1e1e22; --line: #34343a; --accent: #8aa2ff;
+  --c0: #fb923c; --c1: #60a5fa; --c2: #4ade80; --c3: #c084fc; --c4: #fbbf24; --on-c: #111;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--fg); }
+select, button { font: inherit; color: inherit; }
+p { margin: 0; }
+/* Author display rules (e.g. .chips { display: flex }) would otherwise override [hidden]. */
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.muted { color: var(--muted); }
+
+.page { height: 100vh; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; padding: 14px 20px 12px; overflow: hidden; }
+
+/* Header band */
+.band { text-align: center; }
+.hero { font-size: clamp(18px, 2.3vw, 30px); line-height: 1.2; font-weight: 300; margin: 0; }
+.hero strong { font-weight: 800; }
+.hero .odds { color: var(--accent); font-weight: 800; white-space: nowrap; }
+.pair { display: flex; justify-content: center; align-items: baseline; gap: 10px 36px; flex-wrap: wrap; margin-top: 6px; }
+.big { font-size: clamp(18px, 2.4vw, 30px); font-weight: 800; letter-spacing: -.02em; margin-right: 6px; }
+.pair select { border: 0; border-bottom: 2px dashed var(--accent); background: transparent; font-weight: 600; cursor: pointer; }
+.meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.linkbtn { background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; font-size: 12px; }
+/* Separators live in CSS so reader views, which drop buttons, leave no stray dots. */
+.linkbtn.sep::before { content: "· "; color: var(--muted); }
+.nation-name { font-weight: 600; border-bottom: 2px dashed var(--accent); cursor: pointer; }
+.nation-edit { background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0 2px; font-size: 14px; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+           clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+/* Three columns: narrow trait columns around the diagram */
+.grid { display: grid; grid-template-columns: clamp(180px, 16vw, 230px) minmax(0, 1fr) clamp(180px, 16vw, 230px); gap: 16px; min-height: 0; }
+.col { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; overflow: auto; min-height: 0; }
+.col h2 { font-size: 13px; margin: 0 0 2px; letter-spacing: .02em; }
+.note { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+/* Generated text: visible and announced, but skipped by reader views. */
+.gen::before { content: attr(data-text); }
+.grp { padding: 6px 0; border-top: 1px solid var(--line); }
+.label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; margin: 0 0 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 2px 9px; cursor: pointer; font-size: 12.5px; }
+.chip small { color: var(--muted); margin-left: 4px; font-size: 11px; }
+.chip[aria-pressed="true"] { color: var(--on-c); border-color: transparent; }
+.chip[aria-pressed="true"] small { color: inherit; opacity: .85; }
+.chip:disabled { opacity: .4; cursor: not-allowed; }
+.acc { display: flex; width: 100%; justify-content: space-between; align-items: center; background: none; border: 0; padding: 4px 0; cursor: pointer; text-align: left; }
+.acc .caret { color: var(--muted); display: inline-block; transition: transform .15s; }
+.acc[aria-expanded="true"] .caret { transform: rotate(90deg); }
+.badge { background: var(--accent); color: var(--card); border-radius: 999px; padding: 0 6px; font-size: 11px; font-weight: 700; margin-left: 6px; }
+
+/* Diagram + inspector */
+.stage { min-height: 0; display: flex; align-items: center; justify-content: center; position: relative; }
+.venn { height: 100%; aspect-ratio: 1 / 1; max-width: 100%; }
+.venn svg { width: 100%; height: 100%; display: block; user-select: none; }
+.venn text { pointer-events: none; fill: var(--fg); }
+.venn .empty { height: 100%; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+.inspector { position: absolute; right: 0; bottom: 0; width: 230px; background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+             padding: 12px 14px; font-size: 12.5px; box-shadow: 0 6px 18px rgba(0, 0, 0, .08); }
+.inspector .odds { font-size: 26px; font-weight: 800; color: var(--accent); line-height: 1.15; margin: 2px 0; }
+.inspector .counts { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; color: var(--muted); }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+/* Reader-view / screen-reader summary: clipped, not display:none, so reader
+   views and assistive technology still treat it as visible content. */
+.reader-summary { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+                  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+/* In-app text view: the summary replaces the diagram and inspector and
+   updates live with every selection change. */
+.text-view .venn, .text-view .inspector { display: none; }
+.text-view .stage { align-items: stretch; justify-content: stretch; }
+.text-view .reader-summary { position: static; flex: 1; min-height: 0; width: auto; height: auto; max-width: 720px; margin: 0 auto;
+                             padding: 4px 8px; overflow: auto; clip: auto; clip-path: none; white-space: normal; font-size: 14px; line-height: 1.5; }
+.reader-summary h2 { font-size: 16px; margin: 0 0 8px; }
+.reader-summary h3 { font-size: 13px; margin: 14px 0 4px; }
+.reader-summary ul { margin: 0; padding-left: 20px; }
+.reader-summary table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+.reader-summary th, .reader-summary td { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; vertical-align: top; }
+.reader-summary thead th { color: var(--muted); font-weight: 600; }
+
+/* Footer: two lines */
+.src { text-align: center; font-size: 12px; color: var(--muted); }
+
+/* Printing shows the text summary instead of the interactive controls. */
+@media print {
+  .page { height: auto; overflow: visible; display: block; }
+  .grid .col, .inspector, .nation-edit, .linkbtn { display: none; }
+  .venn { height: auto; width: 60%; margin: 0 auto; }
+  .reader-summary { position: static; width: auto; height: auto; margin: 16px 0 0; overflow: visible; clip: auto; clip-path: none; white-space: normal; }
+}
+
+@media (max-width: 1000px) {
+  .page { height: auto; overflow: visible; grid-template-rows: auto; }
+  .grid { grid-template-columns: 1fr; }
+  .stage { order: -1; flex-direction: column; }
+  .venn { height: auto; width: 100%; max-width: 560px; }
+  .inspector { position: static; width: 100%; max-width: 560px; margin-top: 8px; }
+}

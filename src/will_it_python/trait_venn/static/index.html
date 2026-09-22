@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trait Venn</title>
+<meta name="description" content="Estimate how rare a person is from a combination of traits, with a Venn diagram of every intersection and expected head counts worldwide and by nation.">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<div class="page">
+  <header class="band">
+    <h1 class="hero" id="hero" aria-live="polite"></h1>
+    <div class="pair">
+      <p id="world-count"></p>
+      <!-- The nation reads as plain text; the picker exists only while open, so
+           reader views (which copy selects but drop buttons) show text only. -->
+      <p>
+        <span class="big" id="nation-count"></span>
+        <span class="muted">in</span>
+        <span class="nation-name" id="nation-name"></span><button type="button" class="nation-edit" id="nation-edit"
+          aria-expanded="false" aria-controls="nation-picker" aria-label="Change nation of origin">▾</button>
+        <span id="nation-picker" hidden><label for="nation" class="sr-only">Nation of origin</label><select id="nation"></select></span>
+        <span class="muted" id="nation-odds"></span>
+      </p>
+    </div>
+    <p class="meta"><span id="selected-count"></span>
+      <button type="button" class="linkbtn sep" id="clear">Clear all</button>
+      <button type="button" class="linkbtn sep" id="text-view" aria-pressed="false">Text view</button></p>
+  </header>
+
+  <main class="grid">
+    <!-- Column headings and notes are CSS-generated (data-text) so browser
+         reader views, which skip generated content, leave them out; aria-label
+         keeps the heading names for assistive technology. -->
+    <section class="col" aria-labelledby="conventional-h">
+      <h2 id="conventional-h" class="gen" data-text="Conventional" aria-label="Conventional"></h2>
+      <p class="note gen" id="conventional-note" data-text=""></p>
+      <div id="conventional"></div>
+    </section>
+
+    <section class="stage" aria-label="Venn diagram of selected traits">
+      <div class="venn" id="venn"></div>
+      <aside class="inspector" id="inspector" aria-live="polite"></aside>
+      <!-- Text version of the result: shown by "Text view"; otherwise visually
+           hidden with clipping (not display:none) so screen readers keep it.
+           It is the page's only article element, so browser reader views choose it
+           as the main content and leave out the interactive controls. -->
+      <article class="reader-summary" id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">Summary</h2>
+        <div id="summary-body"></div>
+      </article>
+    </section>
+
+    <section class="col" aria-labelledby="unconventional-h">
+      <h2 id="unconventional-h" class="gen" data-text="Less conventional" aria-label="Less conventional"></h2>
+      <p class="note gen" data-text="Open a category to drill down"></p>
+      <div id="unconventional"></div>
+    </section>
+  </main>
+
+  <footer class="src">
+    <p id="sources"></p>
+    <p>Traits assumed independent except where they depend on gender (color blindness, height, migraines).</p>
+  </footer>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

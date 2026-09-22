@@ -6,6 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — venn-diagrams (issue #9)
+
+### Added
+
+- `trait_venn` web app: select 1–5 traits and see a Venn diagram of their
+  prevalence, every intersection, "1 in N" odds, and expected head counts for
+  the world and a selected nation of origin
+- 100 traits in 14 categories, split into conventional (always visible:
+  gender, age, handedness, eye color, hair color, blood type, where you
+  live) and less conventional (drill-down: everyday, senses & mind, health,
+  genetic quirks, birth, lifestyle, rare experiences); one choice per
+  exclusive group; age brackets ordered youngest to oldest
+- Gender-conditional probability model for color blindness, height, and
+  migraines
+- Tuned 4- and 5-set ellipse layouts that keep the all-traits center small
+- World and US population from the Census Population Clock with a labeled
+  fallback projection; static 2026 estimates for other nations
+- Runnable with `uvx --from . trait_venn` (or from the GitHub URL): the
+  project now declares a setuptools build system, ships the page assets as
+  package data, and rebuilds local installs when sources change
+- README instructions for updating traits, categories, and nations
+- Keyboard exploration of diagram regions and WCAG-oriented focus, contrast,
+  and ARIA state handling
+- Text view: a live text summary (headline, counts, selected traits, table
+  of every intersection) that replaces the diagram on demand
+- Reader-view support: the summary stays available to browser reader views
+  and screen readers when hidden, is server-rendered into the initial HTML
+  for the URL's selection, and selection changes are pushed to browser
+  history so reader views re-read the page; the SVG uses concrete colors,
+  the document title follows the result, and print styles show the summary
+- 347 tests with 100% branch coverage for the `trait_venn` package
+
+---
+
 ## [Unreleased] — naval-flags (PR #8, merged 2026-05-24)
 
 ### Added
