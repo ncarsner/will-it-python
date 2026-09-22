@@ -75,15 +75,25 @@ uvx --from . trait_venn
 # From any directory, pointing at a local clone
 uvx --from /path/to/will-it-python trait_venn
 
-# Straight from GitHub, without cloning (use @<branch> or @<tag> to pin a ref)
+# Straight from GitHub (main), without cloning
 uvx --from git+https://github.com/ncarsner/will-it-python trait_venn
-uvx --from git+https://github.com/ncarsner/will-it-python@venn-diagrams trait_venn
 
-# Options pass through as usual
+# Options pass through after the script name
 uvx --from . trait_venn --port 9000 --no-browser
 ```
 
-The first run downloads the project's dependencies into uv's cache, so it takes longer than later runs. Local runs (`--from .` or a path) rebuild automatically when any file under `src/` changes, so trait edits show up on the next launch without extra flags.
+**From a branch.** Append `@<branch>` to the repository URL; the script name, `trait_venn`, follows:
+
+```bash
+uvx --from git+https://github.com/ncarsner/will-it-python@venn-diagrams trait_venn
+
+# Pick up commits pushed to the branch since the last run
+uvx --refresh --from git+https://github.com/ncarsner/will-it-python@venn-diagrams trait_venn
+```
+
+Use a tag or commit hash in place of the branch name (for example `@91de062`) to pin an exact version.
+
+The first run downloads the project's dependencies into uv's cache, so it takes longer than later runs. Git sources are cached after the first build, so pass `--refresh` to fetch new commits. Local runs (`--from .` or a path) rebuild automatically when any file under `src/` changes, so trait edits show up on the next launch without extra flags.
 
 The selection and nation are kept in the page URL (`?sel=female,left,green&country=US`), so a combination can be bookmarked or shared; without `sel`, the default selection (female, left-handed, green eyes) is shown, and `sel=` means nothing selected.
 
