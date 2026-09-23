@@ -16,7 +16,7 @@ Before requesting review, run:
 
 ```bash
 uv run pre-commit run --all-files
-uvx ruff check src tests
+uv run ruff check src tests
 uv run mypy src
 uv run pytest
 ```

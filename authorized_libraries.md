@@ -12,3 +12,4 @@ Approved by: repository owner (paakira@gmail.com)
 | pytest-mock | >=3.0             | unittest.mock fixture wrapper    | repository owner | 2026-05-22 |
 | pre-commit  | >=4.0             | Git hook runner                  | repository owner | 2026-09-23 |
 | detect-secrets | >=1.5          | Secret pattern scanning          | repository owner | 2026-09-23 |
+| ruff        | >=0.16            | Linter and formatter             | repository owner | 2026-09-23 |

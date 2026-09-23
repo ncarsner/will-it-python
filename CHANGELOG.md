@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   dependency group and to `authorized_libraries.md`
 - README "Development" section covering hook installation and the checks to run
   before requesting review
+- `ruff` pinned in the dev dependency group, so `uv run ruff` resolves the same
+  version for everyone instead of whatever the machine happens to have
 
 ---
 
