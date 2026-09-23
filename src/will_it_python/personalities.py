@@ -524,6 +524,7 @@ def _linspace(start: float, stop: float, n: int) -> list[float]:
 
 
 def _make_ellipsoid_surface(
+    *,
     cx: float,
     cy: float,
     cz: float,
@@ -563,6 +564,7 @@ def _make_ellipsoid_surface(
 
 
 def _make_great_circles(
+    *,
     cx: float,
     cy: float,
     cz: float,
@@ -618,6 +620,7 @@ def _make_great_circles(
 
 
 def _make_octant_labels(
+    *,
     cx: float,
     cy: float,
     cz: float,
@@ -724,6 +727,7 @@ def _make_circle_background(
 
 
 def _make_quadrant_labels(
+    *,
     cx: float,
     cy: float,
     rx: float,
@@ -846,9 +850,21 @@ def build_figure(
         cz = _MIDPOINTS[z_dim]
         rz = _HALF_RANGES[z_dim]
 
-        traces.append(_make_ellipsoid_surface(cx, cy, cz, rx, ry, rz))
-        traces.extend(_make_great_circles(cx, cy, cz, rx, ry, rz))
-        traces.append(_make_octant_labels(cx, cy, cz, rx, ry, rz, x_dim, y_dim, z_dim))
+        traces.append(_make_ellipsoid_surface(cx=cx, cy=cy, cz=cz, rx=rx, ry=ry, rz=rz))
+        traces.extend(_make_great_circles(cx=cx, cy=cy, cz=cz, rx=rx, ry=ry, rz=rz))
+        traces.append(
+            _make_octant_labels(
+                cx=cx,
+                cy=cy,
+                cz=cz,
+                rx=rx,
+                ry=ry,
+                rz=rz,
+                x_dim=x_dim,
+                y_dim=y_dim,
+                z_dim=z_dim,
+            )
+        )
 
         if complete:
             traces.append(
@@ -904,7 +920,9 @@ def build_figure(
         )
     else:
         traces.extend(_make_circle_background(cx, cy, rx, ry))
-        traces.append(_make_quadrant_labels(cx, cy, rx, ry, x_dim, y_dim))
+        traces.append(
+            _make_quadrant_labels(cx=cx, cy=cy, rx=rx, ry=ry, x_dim=x_dim, y_dim=y_dim)
+        )
 
         if complete:
             traces.append(
@@ -1027,7 +1045,7 @@ def compute_figure(
     )
 
 
-def add_person_to_store(
+def add_person_to_store(  # noqa: PLR0917 - Dash passes callback args positionally
     n_clicks: int | None,
     store_data: str,
     name: str | None,
@@ -1328,7 +1346,7 @@ def _register_callbacks(app: dash.Dash) -> None:
         State("mbti-input", "value"),
         prevent_initial_call=True,
     )
-    def _add_person(
+    def _add_person(  # noqa: PLR0917 - Dash passes callback args positionally
         n_clicks: int | None,
         store_data: str,
         name: str | None,
