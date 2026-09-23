@@ -4,10 +4,9 @@ Police Lights Simulator
 Simulates two over-cab police lights alternating in the terminal.
 """
 
+import argparse
 import sys
 import time
-import argparse
-
 
 # ANSI color codes
 RED_BG = "\033[41m"
@@ -27,7 +26,7 @@ def draw_light(color: str, is_on: bool) -> str:
     else:
         # Dimmed/off light
         light = "   ....   "
-    
+
     return light
 
 
@@ -35,7 +34,7 @@ def draw_lights(left_on: bool, right_on: bool, mode: str = "emergency") -> str:
     """Draw both police lights."""
     left = draw_light(RED_BG, left_on)
     right = draw_light(BLUE_BG, right_on)
-    
+
     # Create the display with spacing
     spacing = "     "
     top_bracket = "╔══════════╗" + spacing + "╔══════════╗"
@@ -43,11 +42,13 @@ def draw_lights(left_on: bool, right_on: bool, mode: str = "emergency") -> str:
     bottom_bracket = "╚══════════╝" + spacing + "╚══════════╝"
     label_line = "    RED    " + spacing + "   BLUE    "
     mode_label = f"  Mode: {mode.upper()}  "
-    
-    return f"\n{top_bracket}\n{light_line}\n{bottom_bracket}\n{label_line}\n{mode_label}\n"
+
+    return (
+        f"\n{top_bracket}\n{light_line}\n{bottom_bracket}\n{label_line}\n{mode_label}\n"
+    )
 
 
-def clear_previous_frame():
+def clear_previous_frame() -> None:
     """Clear the previous frame by moving cursor up and clearing lines."""
     # Move cursor up 6 lines and clear them (added mode label)
     for _ in range(6):
@@ -57,37 +58,31 @@ def clear_previous_frame():
 
 def get_pattern(mode: str, frame: int) -> tuple[bool, bool]:
     """Get the light states for a given mode and frame number.
-    
+
     Returns:
         Tuple of (left_on, right_on)
     """
+    alternating = (frame % 2 == 0, frame % 2 == 1)
     match mode:
-        case "emergency":
-            # Fast alternating - standard emergency response
-            return (frame % 2 == 0, frame % 2 == 1)
-        case "traffic-stop":
-            # Slower, steady alternating - routine traffic stop
-            return (frame % 2 == 0, frame % 2 == 1)
         case "pursuit":
             # Both lights flash together rapidly
-            return (True, True) if frame % 2 == 0 else (False, False)
+            pattern = (True, True) if frame % 2 == 0 else (False, False)
         case "code-3":
             # Rapid alternating with double-flash pattern
             # Pattern: L, R, L, R, LL, RR
             cycle = frame % 6
             match cycle:
                 case 4:
-                    return (True, False)  # LL
-                case 0 | 1 | 2 | 3:
-                    return (cycle % 2 == 0, cycle % 2 == 1)  # L, R, L, R
+                    pattern = (True, False)  # LL
+                case 5:
+                    pattern = (False, True)  # RR
                 case _:
-                    return (False, True)  # RR
-        case "cruise":
-            # Slow, calm alternating - just cruising
-            return (frame % 2 == 0, frame % 2 == 1)
+                    pattern = (cycle % 2 == 0, cycle % 2 == 1)  # L, R, L, R
         case _:
-            # Default to emergency
-            return (frame % 2 == 0, frame % 2 == 1)
+            # emergency, traffic-stop, cruise, and any unknown mode alternate;
+            # they differ only in speed (see get_mode_speed)
+            pattern = alternating
+    return pattern
 
 
 def get_mode_speed(mode: str) -> float:
@@ -102,10 +97,14 @@ def get_mode_speed(mode: str) -> float:
     return speeds.get(mode, 0.5)
 
 
-def simulate_lights(duration: float = 10.0, speed: float | None = None, mode: str = "emergency") -> None:
+def simulate_lights(
+    duration: float = 10.0,
+    speed: float | None = None,
+    mode: str = "emergency",
+) -> None:
     """
     Simulate alternating police lights.
-    
+
     Args:
         duration: Total duration to run the simulation (seconds)
         speed: Time between alternations (seconds), None for mode default
@@ -114,33 +113,33 @@ def simulate_lights(duration: float = 10.0, speed: float | None = None, mode: st
     # Use mode default speed if not specified
     if speed is None:
         speed = get_mode_speed(mode)
-    
+
     print(HIDE_CURSOR, end="")
-    
+
     try:
         start_time = time.time()
         frame = 0
         first_frame = True
-        
+
         while time.time() - start_time < duration:
             # Clear previous frame (except for first frame)
             if not first_frame:
                 clear_previous_frame()
             else:
                 first_frame = False
-            
+
             # Get light states based on mode and frame
             left_on, right_on = get_pattern(mode, frame)
-            
+
             # Draw the current state
             display = draw_lights(left_on, right_on, mode)
             sys.stdout.write(display)
             sys.stdout.flush()
-            
+
             # Wait and increment frame
             time.sleep(speed)
             frame += 1
-            
+
     except KeyboardInterrupt:
         pass
     finally:
@@ -151,7 +150,7 @@ def simulate_lights(duration: float = 10.0, speed: float | None = None, mode: st
 def main() -> int:
     """Main entry point for the police lights simulator."""
     modes = ["emergency", "traffic-stop", "pursuit", "code-3", "cruise"]
-    
+
     parser = argparse.ArgumentParser(
         description="Simulate two over-cab police lights in the terminal",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -182,49 +181,49 @@ def main() -> int:
         default=None,
         help="Time between light changes in seconds (default: mode-specific)"
     )
-    
+
     args = parser.parse_args()
-    
+
     # Validate arguments
     if args.duration <= 0:
         print("Error: duration must be positive", file=sys.stderr)
         return 1
-    
+
     if args.speed is not None and args.speed <= 0:
         print("Error: speed must be positive", file=sys.stderr)
         return 1
-    
+
     simulate_lights(duration=args.duration, speed=args.speed, mode=args.mode)
     return 0
 
 
 def emgy() -> int:
     """Entry point for emergency mode."""
-    sys.argv = [sys.argv[0], "-m", "emergency"] + sys.argv[1:]
+    sys.argv = [sys.argv[0], "-m", "emergency", *sys.argv[1:]]
     return main()
 
 
 def code3() -> int:
     """Entry point for code-3 mode."""
-    sys.argv = [sys.argv[0], "-m", "code-3"] + sys.argv[1:]
+    sys.argv = [sys.argv[0], "-m", "code-3", *sys.argv[1:]]
     return main()
 
 
 def pursuit() -> int:
     """Entry point for pursuit mode."""
-    sys.argv = [sys.argv[0], "-m", "pursuit"] + sys.argv[1:]
+    sys.argv = [sys.argv[0], "-m", "pursuit", *sys.argv[1:]]
     return main()
 
 
 def traffic_stop() -> int:
     """Entry point for traffic-stop mode."""
-    sys.argv = [sys.argv[0], "-m", "traffic-stop"] + sys.argv[1:]
+    sys.argv = [sys.argv[0], "-m", "traffic-stop", *sys.argv[1:]]
     return main()
 
 
 def cruise() -> int:
     """Entry point for cruise mode."""
-    sys.argv = [sys.argv[0], "-m", "cruise"] + sys.argv[1:]
+    sys.argv = [sys.argv[0], "-m", "cruise", *sys.argv[1:]]
     return main()
 
 
