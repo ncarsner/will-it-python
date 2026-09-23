@@ -1,0 +1,28 @@
+# Secret scanning and repository hygiene hooks.
+#
+# First-time setup in a fresh clone:
+#   uv sync
+#   uv run pre-commit install
+#
+# Run manually against every tracked file:
+#   uv run pre-commit run --all-files
+#
+# Update hook versions (quarterly, or when an advisory affects a hook):
+#   uv run pre-commit autoupdate
+
+repos:
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+        # The baseline records its own hashes; uv.lock holds package digests.
+        exclude: (\.secrets\.baseline|uv\.lock)$
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: detect-private-key
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: check-merge-conflict

@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — tooling (issue #13)
+
+### Added
+
+- Pre-commit hook suite for secret scanning: `detect-secrets` against a
+  committed `.secrets.baseline`, plus private-key, large-file, and
+  merge-conflict checks; `pre-commit` and `detect-secrets` added to the dev
+  dependency group and to `authorized_libraries.md`
+- README "Development" section covering hook installation and the checks to run
+  before requesting review
+
+---
+
 ## [Unreleased] — venn-diagrams (issue #9)
 
 ### Added

@@ -1,6 +1,38 @@
 # will-it-python
 an array of programs written just to see if the idea can be accomplished in Python code
 
+## Development
+
+```bash
+uv sync                    # create the environment, including dev tools
+uv run pre-commit install  # wire the secret-scanning hooks into git commit
+```
+
+`pre-commit install` is a one-time step per clone. After it, every commit runs
+`detect-secrets` against `.secrets.baseline`, plus checks for private keys,
+files over 500 KB, and unresolved merge conflict markers.
+
+Before requesting review, run:
+
+```bash
+uv run pre-commit run --all-files
+uvx ruff check src tests
+uv run mypy src
+uv run pytest
+```
+
+If `detect-secrets` flags a line that is not a secret, confirm that by reading
+it, then record it in the baseline and say why in the commit message:
+
+```bash
+uv run detect-secrets scan --baseline .secrets.baseline
+```
+
+Hook versions are pinned in `.pre-commit-config.yaml`; refresh them with
+`uv run pre-commit autoupdate`.
+
+---
+
 ## Naval Flags
 
 A CLI that converts text to [International Code of Signals (ICS)](https://en.wikipedia.org/wiki/International_maritime_signal_flags) naval signal flags rendered in the terminal.
