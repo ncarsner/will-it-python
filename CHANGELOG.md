@@ -28,7 +28,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   package data, and rebuilds local installs when sources change
 - README instructions for updating traits, categories, and nations
 - Keyboard exploration of diagram regions and WCAG-oriented focus, contrast,
-  and ARIA state handling
+  and ARIA state handling; verified with an axe-core WCAG 2.1 AA scan across
+  five page states (#11)
 - Text view: a live text summary (headline, counts, selected traits, table
   of every intersection) that replaces the diagram on demand
 - Reader-view support: the summary stays available to browser reader views
